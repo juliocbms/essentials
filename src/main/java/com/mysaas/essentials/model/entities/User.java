@@ -7,13 +7,11 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
@@ -56,11 +54,19 @@ public class User implements UserDetails {
     @Column(name = "deleted_at",nullable = true)
     private LocalDateTime deletedAt;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "tb_users_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
+
 
     public User() {
     }
 
-    public User(UUID id, String name, String email, String username, String passwordHash, boolean active, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime lastLoginAt, boolean emailVerified, LocalDateTime deletedAt) {
+    public User(UUID id, String name, String email, String username, String passwordHash, boolean active, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime lastLoginAt, boolean emailVerified, LocalDateTime deletedAt, Set<Role> roles) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -72,6 +78,7 @@ public class User implements UserDetails {
         this.lastLoginAt = lastLoginAt;
         this.emailVerified = emailVerified;
         this.deletedAt = deletedAt;
+        this.roles = roles;
     }
 
     public UUID getId() {
@@ -158,9 +165,20 @@ public class User implements UserDetails {
         this.deletedAt = deletedAt;
     }
 
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName()))
+                .toList();
     }
 
     @Override
@@ -220,6 +238,7 @@ public class User implements UserDetails {
                 ", lastLoginAt=" + lastLoginAt +
                 ", emailVerified=" + emailVerified +
                 ", deletedAt=" + deletedAt +
+                ", roles=" + roles +
                 '}';
     }
 }

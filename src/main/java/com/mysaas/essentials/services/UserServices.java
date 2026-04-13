@@ -4,8 +4,10 @@ package com.mysaas.essentials.services;
 
 import com.mysaas.essentials.model.dto.UsersDTOS.UserRegisterRequest;
 import com.mysaas.essentials.model.dto.UsersDTOS.UserUpdateRequest;
+import com.mysaas.essentials.model.entities.Role;
 import com.mysaas.essentials.model.entities.User;
 import com.mysaas.essentials.model.mappers.UserMapper;
+import com.mysaas.essentials.repository.RoleRepository;
 import com.mysaas.essentials.repository.UserRepository;
 import com.mysaas.essentials.services.exceptions.EmailAlreadyExistsException;
 import com.mysaas.essentials.services.exceptions.ResourceNotFoundException;
@@ -23,12 +25,14 @@ public class UserServices {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
-    public UserServices(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder){
+    public UserServices(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder, RoleRepository roleRepository){
 
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
     }
 
     @Transactional
@@ -37,6 +41,10 @@ public class UserServices {
             throw new EmailAlreadyExistsException(request.email());
         }
         User newUser = userMapper.toEntity(request);
+        Role defaultRole = roleRepository.findByName("ROLE_USER")
+                .orElseThrow(() -> new RuntimeException("Default role not found"));
+
+        newUser.getRoles().add(defaultRole);
         newUser.setPasswordHash(passwordEncoder.encode(newUser.getPassword()));
         newUser.setActive(true);
         try {
