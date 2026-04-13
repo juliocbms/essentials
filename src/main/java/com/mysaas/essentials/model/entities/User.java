@@ -5,6 +5,7 @@ package com.mysaas.essentials.model.entities;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -15,85 +16,146 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "tb_user")
 public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID Id;
+    private UUID id;
 
     @Column(name = "name",nullable = false)
-    private String Name;
+    private String name;
 
     @Column(name = "email",nullable = false)
-    private String Email;
+    private String email;
 
     @Column(name = "username",nullable = false)
-    private String Username;
+    private String username;
 
     @Column(name = "password",nullable = false)
-    private String PasswordHash;
+    private String passwordHash;
 
     @Column(name = "status",nullable = false)
-    private boolean Active;
+    private boolean active;
 
-    @Column(name = "createdAt",nullable = false)
+    @Column(name = "created_at",nullable = false, updatable = false)
     @CreatedDate
-    private LocalDateTime CreatedAt;
+    private LocalDateTime createdAt;
 
-    @Column(name = "updatedAt",nullable = true)
+    @Column(name = "updated_at",nullable = true)
     @LastModifiedDate
-    private LocalDateTime UpdatedAt;
+    private LocalDateTime updatedAt;
 
-    @Column(name = "lastloginAt",nullable = true)
-    private LocalDateTime LastLoginAt;
+    @Column(name = "lastlogin_at",nullable = true)
+    private LocalDateTime lastLoginAt;
 
     @Column(name = "emailVerified",nullable = false)
-    private boolean EmailVerified;
+    private boolean emailVerified;
 
-    @Column(name = "deletedAt",nullable = true)
-    private LocalDateTime DeletedAt;
+    @Column(name = "deleted_at",nullable = true)
+    private LocalDateTime deletedAt;
 
 
     public User() {
     }
 
     public User(UUID id, String name, String email, String username, String passwordHash, boolean active, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime lastLoginAt, boolean emailVerified, LocalDateTime deletedAt) {
-        Id = id;
-        Name = name;
-        Email = email;
-        Username = username;
-        PasswordHash = passwordHash;
-        Active = active;
-        CreatedAt = createdAt;
-        UpdatedAt = updatedAt;
-        LastLoginAt = lastLoginAt;
-        EmailVerified = emailVerified;
-        DeletedAt = deletedAt;
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.username = username;
+        this.passwordHash = passwordHash;
+        this.active = active;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.lastLoginAt = lastLoginAt;
+        this.emailVerified = emailVerified;
+        this.deletedAt = deletedAt;
     }
 
     public UUID getId() {
-        return Id;
+        return id;
     }
 
     public void setId(UUID id) {
-        Id = id;
+        this.id = id;
     }
 
     public String getName() {
-        return Name;
+        return name;
     }
 
     public void setName(String name) {
-        Name = name;
+        this.name = name;
     }
 
     public String getEmail() {
-        return Email;
+        return email;
     }
 
     public void setEmail(String email) {
-        Email = email;
+        this.email = email;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public LocalDateTime getLastLoginAt() {
+        return lastLoginAt;
+    }
+
+    public void setLastLoginAt(LocalDateTime lastLoginAt) {
+        this.lastLoginAt = lastLoginAt;
+    }
+
+    public boolean isEmailVerified() {
+        return emailVerified;
+    }
+
+    public void setEmailVerified(boolean emailVerified) {
+        this.emailVerified = emailVerified;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
     }
 
     @Override
@@ -103,12 +165,14 @@ public class User implements UserDetails {
 
     @Override
     public String getPassword() {
-        return PasswordHash;
+        return passwordHash;
     }
 
+    @Override
     public String getUsername() {
-        return Username;
+        return username;
     }
+
 
     @Override
     public boolean isAccountNonExpired() {
@@ -130,93 +194,32 @@ public class User implements UserDetails {
         return UserDetails.super.isEnabled();
     }
 
-    public void setUsername(String username) {
-        Username = username;
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id) && Objects.equals(email, user.email) && Objects.equals(username, user.username);
     }
 
-    public String getPasswordHash() {
-        return PasswordHash;
-    }
-
-    public void setPasswordHash(String passwordHash) {
-        PasswordHash = passwordHash;
-    }
-
-    public boolean isActive() {
-        return Active;
-    }
-
-    public void setActive(boolean active) {
-        Active = active;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return CreatedAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        CreatedAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return UpdatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        UpdatedAt = updatedAt;
-    }
-
-    public LocalDateTime getLastLoginAt() {
-        return LastLoginAt;
-    }
-
-    public void setLastLoginAt(LocalDateTime lastLoginAt) {
-        LastLoginAt = lastLoginAt;
-    }
-
-    public boolean isEmailVerified() {
-        return EmailVerified;
-    }
-
-    public void setEmailVerified(boolean emailVerified) {
-        EmailVerified = emailVerified;
-    }
-
-    public LocalDateTime getDeletedAt() {
-        return DeletedAt;
-    }
-
-    public void setDeletedAt(LocalDateTime deletedAt) {
-        DeletedAt = deletedAt;
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, email, username);
     }
 
     @Override
     public String toString() {
         return "User{" +
-                "Id='" + Id + '\'' +
-                ", Name='" + Name + '\'' +
-                ", Email='" + Email + '\'' +
-                ", Username='" + Username + '\'' +
-                ", PasswordHash='" + PasswordHash + '\'' +
-                ", Active=" + Active +
-                ", CreatedAt=" + CreatedAt +
-                ", UpdatedAt=" + UpdatedAt +
-                ", LastLoginAt=" + LastLoginAt +
-                ", EmailVerified=" + EmailVerified +
-                ", DeletedAt=" + DeletedAt +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", username='" + username + '\'' +
+                ", passwordHash='" + passwordHash + '\'' +
+                ", active=" + active +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", lastLoginAt=" + lastLoginAt +
+                ", emailVerified=" + emailVerified +
+                ", deletedAt=" + deletedAt +
                 '}';
-    }
-
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return Objects.equals(Id, user.Id) && Objects.equals(Name, user.Name) && Objects.equals(Email, user.Email) && Objects.equals(Username, user.Username);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(Id, Name, Email, Username);
     }
 }

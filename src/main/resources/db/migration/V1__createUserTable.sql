@@ -11,3 +11,5 @@ CREATE TABLE tb_user (
     email_verified BOOLEAN NOT NULL DEFAULT FALSE,
     deleted_at TIMESTAMP WITHOUT TIME ZONE
 );
+
+CREATE INDEX idx_user_active_email ON tb_user (email) WHERE deleted_at IS NULL;

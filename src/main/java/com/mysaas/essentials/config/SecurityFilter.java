@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -35,7 +36,7 @@ public class SecurityFilter extends OncePerRequestFilter {
             if (optUser.isPresent()){
                 JWTUserData userData = optUser.get();
                 UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(userData, null);
+                        new UsernamePasswordAuthenticationToken(userData, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }

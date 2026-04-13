@@ -11,6 +11,7 @@ import com.mysaas.essentials.services.exceptions.EmailAlreadyExistsException;
 import com.mysaas.essentials.services.exceptions.ResourceNotFoundException;
 import com.mysaas.essentials.services.exceptions.UsernameAlreadyExistsException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,11 +22,13 @@ public class UserServices {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServices(UserRepository userRepository, UserMapper userMapper){
+    public UserServices(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder){
 
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -34,6 +37,7 @@ public class UserServices {
             throw new EmailAlreadyExistsException(request.email());
         }
         User newUser = userMapper.toEntity(request);
+        newUser.setPasswordHash(passwordEncoder.encode(newUser.getPassword()));
         newUser.setActive(true);
         try {
             return userRepository.save(newUser);

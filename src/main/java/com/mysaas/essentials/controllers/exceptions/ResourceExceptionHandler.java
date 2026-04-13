@@ -49,6 +49,15 @@ public class ResourceExceptionHandler {
         return ResponseEntity.status(status).body(err);
     }
 
+//    @ExceptionHandler(RegraNegocioException.class)
+//    public ResponseEntity<StandardError> acessoNegado(RegraNegocioException e, HttpServletRequest request){
+//        String error = "Business rules error";
+//        HttpStatus status = HttpStatus.FORBIDDEN;
+//        StandardError err = new StandardError(Instant.now(),status.value(),error,e.getMessage(),request.getRequestURI());
+//        return ResponseEntity.status(status).body(err);
+//    }
+
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<StandardError> validation(MethodArgumentNotValidException e, HttpServletRequest request) {
         String error = "Validation Error";
