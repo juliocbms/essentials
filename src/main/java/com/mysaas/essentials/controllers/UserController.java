@@ -1,10 +1,12 @@
 package com.mysaas.essentials.controllers;
 
 import com.mysaas.essentials.config.TokenConfig;
+import com.mysaas.essentials.controllers.docs.UserControllerDocs;
 import com.mysaas.essentials.model.dto.UsersDTOS.*;
 import com.mysaas.essentials.model.entities.User;
 import com.mysaas.essentials.model.mappers.UserMapper;
 import com.mysaas.essentials.services.UserServices;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +22,8 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/users")
-public class UserController {
+@Tag(name = "Users",description = "Endpoints for Managing People")
+public class UserController implements UserControllerDocs {
     private final UserServices userServices;
     private final UserMapper userMapper;
     private final AuthenticationManager authenticationManager;
@@ -34,7 +37,8 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login (@Valid @RequestBody LoginRequest request){
+    @Override
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request){
         UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(request.email(),request.password());
         Authentication authentication = authenticationManager.authenticate(userAndPass);
 
@@ -44,6 +48,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
+    @Override
     public ResponseEntity<UserRegisterResponse> insertUser(@Valid @RequestBody UserRegisterRequest userRegisterRequest){
         User insertedUser = userServices.insertUser(userRegisterRequest);
         UserRegisterResponse response = userMapper.toResponse(insertedUser);
@@ -51,6 +56,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @Override
     public ResponseEntity<UserRegisterResponse> getUserById(@PathVariable UUID id){
         User findedUser = userServices.getUserById(id);
         UserRegisterResponse response = userMapper.toResponse(findedUser);
@@ -58,13 +64,15 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserRegisterResponse> updateUserById(@PathVariable UUID id,@Valid @RequestBody UserUpdateRequest request){
+    @Override
+    public ResponseEntity<UserRegisterResponse> updateUserById(@PathVariable UUID id, @Valid @RequestBody UserUpdateRequest request){
         User updatedUser = userServices.updateUser(request, id);
         UserRegisterResponse response = userMapper.toResponse(updatedUser);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
+    @Override
     public ResponseEntity<Void> deledUserById(@PathVariable UUID id){
          userServices.deleteUser(id);
          return ResponseEntity.noContent().build();

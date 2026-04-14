@@ -16,6 +16,10 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     enabled: true
+spring-doc:
+  paths-to-match: /users/**
+  swagger-ui:
+    use-root-path: true
 
 api:
   security:
