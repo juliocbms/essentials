@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Component
 public class TokenConfig {
@@ -38,10 +39,11 @@ public class TokenConfig {
             DecodedJWT decode = JWT.require(algorithm)
                     .build().verify(token);
 
-            Long userId = decode.getClaim("userId").asLong();
+            String userIdStr = decode.getClaim("userId").asString();
             String email = decode.getSubject();
             List<String> roles = decode.getClaim("roles").asList(String.class);
-            JWTUserData userData = new JWTUserData(userId, email,roles);
+            UUID userId = UUID.fromString(userIdStr);
+            JWTUserData userData = new JWTUserData(userIdStr, email,roles);
 
             return Optional.of(userData);
 

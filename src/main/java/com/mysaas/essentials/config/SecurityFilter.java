@@ -20,12 +20,12 @@ import java.util.Optional;
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private TokenConfig tokenConfig;
+    private final TokenConfig tokenConfig;
 
-    @Autowired
-    private UserRepository userRepository;
 
+    public SecurityFilter(TokenConfig tokenConfig) {
+        this.tokenConfig = tokenConfig;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -39,7 +39,7 @@ public class SecurityFilter extends OncePerRequestFilter {
                         .map(SimpleGrantedAuthority::new)
                         .toList();
                 UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(userData, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
+                        new UsernamePasswordAuthenticationToken(userData, null, authorities);
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }

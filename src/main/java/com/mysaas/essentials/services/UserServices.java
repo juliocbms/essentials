@@ -41,11 +41,11 @@ public class UserServices {
             throw new EmailAlreadyExistsException(request.email());
         }
         User newUser = userMapper.toEntity(request);
+        newUser.setPasswordHash(passwordEncoder.encode(newUser.getPassword()));
         Role defaultRole = roleRepository.findByName("ROLE_USER")
                 .orElseThrow(() -> new RuntimeException("Default role not found"));
 
         newUser.getRoles().add(defaultRole);
-        newUser.setPasswordHash(passwordEncoder.encode(newUser.getPassword()));
         newUser.setActive(true);
         try {
             return userRepository.save(newUser);
@@ -65,7 +65,7 @@ public class UserServices {
     public User updateUser(UserUpdateRequest request, UUID id){
 
         User updatedUser = findUserOrThrow(id);
-        isEmailAndUsernameValid(request.email(),request.username());
+        isEmailAndUsernameValidForUpdate(request.email(), request.username(), id);
         try {
             updatedUser.setActive(request.active());
             userMapper.updateToEntity(request,updatedUser);
@@ -93,11 +93,13 @@ public class UserServices {
 
     }
 
-    private void isEmailAndUsernameValid(String email, String usename){
-        if (userRepository.existsByEmail(email)){
+    private void isEmailAndUsernameValidForUpdate(String email, String username, UUID currentId) {
+        if (userRepository.existsByEmailAndIdNot(email, currentId)) {
             throw new EmailAlreadyExistsException(email);
-        } else if (userRepository.existsByUsername(usename)) {
-            throw new UsernameAlreadyExistsException(usename);
+        }
+
+        if (userRepository.existsByUsernameAndIdNot(username, currentId)) {
+            throw new UsernameAlreadyExistsException(username);
         }
     }
 
