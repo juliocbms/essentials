@@ -2,7 +2,9 @@ package com.mysaas.essentials.services;
 
 
 
+import com.mysaas.essentials.controllers.UserController;
 import com.mysaas.essentials.model.dto.UsersDTOS.UserRegisterRequest;
+import com.mysaas.essentials.model.dto.UsersDTOS.UserRegisterResponse;
 import com.mysaas.essentials.model.dto.UsersDTOS.UserUpdateRequest;
 import com.mysaas.essentials.model.entities.Role;
 import com.mysaas.essentials.model.entities.User;
@@ -15,10 +17,17 @@ import com.mysaas.essentials.services.exceptions.UsernameAlreadyExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -39,58 +48,85 @@ public class UserServices {
     }
 
     @Transactional
-    public User insertUser (UserRegisterRequest request){
+    public EntityModel<UserRegisterResponse> insertUser(UserRegisterRequest request) {
         logger.info("Starting a register for a new user.");
-       isEmailAndUsernameValidForInsert(request.email(), request.username());
+        isEmailAndUsernameValidForInsert(request.email(), request.username());
+
         User newUser = userMapper.toEntity(request);
         newUser.setPasswordHash(passwordEncoder.encode(request.password()));
         addDefaultRole(newUser);
         newUser.setActive(true);
+
         try {
-            logger.info("User with email: " +request.email()+", Username: " + request.username() + " created!");
-            return userRepository.save(newUser);
-        }catch ( IllegalArgumentException e){
-            logger.error("Error: "+ e.getMessage());
+            User savedUser = userRepository.save(newUser);
+            logger.info("User with email: {} and username: {} created!", request.email(), request.username());
+            return toModel(savedUser);
+
+        } catch (IllegalArgumentException e) {
+            logger.error("Error: {}", e.getMessage());
             throw e;
-        }catch (DataIntegrityViolationException ex){
-            logger.error("Error: "+ ex.getMessage());
+
+        } catch (DataIntegrityViolationException ex) {
+            logger.error("Error: {}", ex.getMessage());
             throw new EmailAlreadyExistsException(newUser.getEmail());
         }
-
     }
 
-    public User getUserById(UUID id){
-        return findUserOrThrow(id);
+    public CollectionModel<EntityModel<UserRegisterResponse>> getAllUsers() {
+        List<EntityModel<UserRegisterResponse>> users = userRepository.findAll()
+                .stream()
+                .map(this::toModel)
+                .toList();
+
+        return CollectionModel.of(
+                users,
+                linkTo(methodOn(UserController.class).getAllUsers()).withSelfRel().withType("GET")
+        );
+    }
+
+    public EntityModel<UserRegisterResponse> getUserById(UUID id) {
+        User user = findEntityOrThrow(id);
+        return toModel(user);
     }
 
     @Transactional
-    public User updateUser(UserUpdateRequest request, UUID id){
-        User updatedUser = findUserOrThrow(id);
-        isUsernameValidForUpdate( request.username(), id);
+    public EntityModel<UserRegisterResponse> updateUser(UserUpdateRequest request, UUID id) {
+        User updatedUser = findEntityOrThrow(id);
+        isUsernameValidForUpdate(request.username(), id);
+
         try {
             updatedUser.setActive(request.active());
-            userMapper.updateToEntity(request,updatedUser);
-            logger.info("User with id: "+ id +"updated!");
-            return userRepository.save(updatedUser);
+            userMapper.updateToEntity(request, updatedUser);
+
+            User savedUser = userRepository.save(updatedUser);
+            logger.info("User with id: {} updated!", id);
+
+            return toModel(savedUser);
 
         } catch (IllegalArgumentException | DataIntegrityViolationException e) {
-            logger.error("Error: "+ e.getMessage());
+            logger.error("Error: {}", e.getMessage());
             throw e;
         }
-
-
     }
 
     @Transactional
-    public void deleteUser( UUID id){
-        User user = findUserOrThrow(id);
-        try{
-            logger.info("User with id" + id + "deleted");
+    public void deleteUser(UUID id) {
+        User user = findEntityOrThrow(id);
+
+        try {
+            logger.info("User with id: {} deleted", id);
             userRepository.delete(user);
-        }catch (IllegalArgumentException | DataIntegrityViolationException e){
-            logger.error("Error: "+ e.getMessage());
+        } catch (IllegalArgumentException | DataIntegrityViolationException e) {
+            logger.error("Error: {}", e.getMessage());
             throw e;
         }
+    }
+
+    private User findEntityOrThrow(UUID id) {
+        logger.info("Searching for user with id: {}", id);
+
+        return userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id));
     }
 
     private Role findDefaultRole() {
@@ -102,34 +138,43 @@ public class UserServices {
         user.getRoles().add(findDefaultRole());
     }
 
-    private void isEmailAndUsernameValidForInsert(String email, String username){
-        if (userRepository.existsByEmail(email)){
-            logger.error("User with email" + email + "already exists");
+    private void isEmailAndUsernameValidForInsert(String email, String username) {
+        if (userRepository.existsByEmail(email)) {
+            logger.error("User with email {} already exists", email);
             throw new EmailAlreadyExistsException(email);
-        } else if (userRepository.existsByUsername(username)) {
-            logger.error("User with username" + username + "already exists");
+        }
+
+        if (userRepository.existsByUsername(username)) {
+            logger.error("User with username {} already exists", username);
             throw new UsernameAlreadyExistsException(username);
         }
     }
 
-    private void isUsernameValidForUpdate( String username, UUID currentId) {
+    private void isUsernameValidForUpdate(String username, UUID currentId) {
         if (userRepository.existsByUsernameAndIdNot(username, currentId)) {
-            logger.error("User with username" + username + "already exists");
-            throw new UsernameAlreadyExistsException(username);
-        }
-
-        if (userRepository.existsByUsernameAndIdNot(username, currentId)) {
-            logger.error("User with username" + username + "already exists");
+            logger.error("User with username {} already exists", username);
             throw new UsernameAlreadyExistsException(username);
         }
     }
 
+    private EntityModel<UserRegisterResponse> toModel(User entity) {
+        UserRegisterResponse dto = userMapper.toResponse(entity);
 
-    private User findUserOrThrow(UUID id) {
-        logger.info("searching for user with id:" + id);
-        return userRepository.findById(id)
-                .orElseThrow(() -> {
-                    return new ResourceNotFoundException(id);
-                });
+        return EntityModel.of(dto,
+                linkTo(methodOn(UserController.class).getUserById(entity.getId()))
+                        .withSelfRel()
+                        .withType("GET"),
+
+                linkTo(methodOn(UserController.class).getAllUsers())
+                        .withRel("all-users")
+                        .withType("GET"),
+
+                linkTo(methodOn(UserController.class).updateUserById(entity.getId(), null))
+                        .withRel("update")
+                        .withType("PUT"),
+
+                linkTo(methodOn(UserController.class).deledUserById(entity.getId()))
+                        .withRel("delete")
+                        .withType("DELETE"));
     }
 }
