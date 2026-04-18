@@ -1,4 +1,4 @@
-package com.mysaas.essentials.model.dto.UsersDTOS;
+package com.mysaas.essentials.model.dto.UsersDTOS.Login;
 
 import jakarta.validation.constraints.NotEmpty;
 

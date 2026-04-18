@@ -1,6 +1,5 @@
-package com.mysaas.essentials.model.dto.UsersDTOS;
+package com.mysaas.essentials.model.dto.UsersDTOS.Update;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 

@@ -1,6 +1,6 @@
 package com.mysaas.essentials.mocks;
 
-import com.mysaas.essentials.model.dto.UsersDTOS.UserRegisterResponse;
+import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterResponse;
 import com.mysaas.essentials.model.entities.User;
 
 import java.time.LocalDateTime;

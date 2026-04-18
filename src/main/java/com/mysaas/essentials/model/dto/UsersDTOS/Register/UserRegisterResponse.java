@@ -1,4 +1,4 @@
-package com.mysaas.essentials.model.dto.UsersDTOS;
+package com.mysaas.essentials.model.dto.UsersDTOS.Register;
 
 import java.time.LocalDateTime;
 

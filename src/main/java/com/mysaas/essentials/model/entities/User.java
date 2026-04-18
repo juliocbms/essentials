@@ -48,7 +48,7 @@ public class User implements UserDetails {
     @Column(name = "lastlogin_at",nullable = true)
     private LocalDateTime lastLoginAt;
 
-    @Column(name = "emailVerified",nullable = false)
+    @Column(name = "email_verified",nullable = false)
     private boolean emailVerified;
 
     @Column(name = "deleted_at",nullable = true)

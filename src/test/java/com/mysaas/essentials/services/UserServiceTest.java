@@ -1,14 +1,16 @@
 package com.mysaas.essentials.services;
 
 import com.mysaas.essentials.mocks.MockUser;
-import com.mysaas.essentials.model.dto.UsersDTOS.UserRegisterRequest;
-import com.mysaas.essentials.model.dto.UsersDTOS.UserRegisterResponse;
-import com.mysaas.essentials.model.dto.UsersDTOS.UserUpdateRequest;
+import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterRequest;
+import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterResponse;
+import com.mysaas.essentials.model.dto.UsersDTOS.Update.UserUpdateRequest;
 import com.mysaas.essentials.model.entities.Role;
 import com.mysaas.essentials.model.entities.User;
 import com.mysaas.essentials.model.mappers.UserMapper;
 import com.mysaas.essentials.repository.RoleRepository;
 import com.mysaas.essentials.repository.UserRepository;
+import com.mysaas.essentials.services.Users.AuthService;
+import com.mysaas.essentials.services.Users.UserService;
 import com.mysaas.essentials.services.exceptions.EmailAlreadyExistsException;
 import com.mysaas.essentials.services.exceptions.ResourceNotFoundException;
 import com.mysaas.essentials.services.exceptions.UsernameAlreadyExistsException;
@@ -32,12 +34,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class UserServicesTest {
+class UserServiceTest {
 
     private MockUser input;
 
     @InjectMocks
-    private UserServices services;
+    private UserService userServices;
+
+    @InjectMocks
+    private AuthService authService;
 
     @Mock
     private UserRepository userRepository;
@@ -94,7 +99,7 @@ class UserServicesTest {
         when(userRepository.save(any())).thenReturn(user);
         when(userMapper.toResponse(user)).thenReturn(response);
 
-        var result = services.insertUser(request);
+        var result = authService.insertUser(request);
 
         assertNotNull(result);
         assertTrue(result.hasLink("self"));
@@ -110,7 +115,7 @@ class UserServicesTest {
         when(userRepository.existsByEmail(any())).thenReturn(true);
 
         assertThrows(EmailAlreadyExistsException.class,
-                () -> services.insertUser(request));
+                () -> authService.insertUser(request));
     }
 
     @Test
@@ -124,7 +129,7 @@ class UserServicesTest {
         when(userRepository.existsByUsername(any())).thenReturn(true);
 
         assertThrows(UsernameAlreadyExistsException.class,
-                () -> services.insertUser(request));
+                () -> authService.insertUser(request));
     }
 
     @Test
@@ -145,7 +150,7 @@ class UserServicesTest {
         when(userRepository.save(any())).thenThrow(DataIntegrityViolationException.class);
 
         assertThrows(EmailAlreadyExistsException.class,
-                () -> services.insertUser(request));
+                () -> authService.insertUser(request));
     }
 
 
@@ -155,7 +160,7 @@ class UserServicesTest {
         when(userRepository.findById(uuid)).thenReturn(Optional.of(user));
         when(userMapper.toResponse(user)).thenReturn(response);
 
-        var result = services.getUserById(uuid);
+        var result = userServices.getUserById(uuid);
 
         assertNotNull(result);
         assertTrue(result.hasLink("self"));
@@ -166,7 +171,7 @@ class UserServicesTest {
         when(userRepository.findById(uuid)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> services.getUserById(uuid));
+                () -> userServices.getUserById(uuid));
     }
 
 
@@ -180,7 +185,7 @@ class UserServicesTest {
         when(userMapper.toResponse(any())).thenReturn(response);
 
         CollectionModel<EntityModel<UserRegisterResponse>> result =
-                services.getAllUsers();
+                userServices.getAllUsers();
 
         assertNotNull(result);
         assertEquals(2, result.getContent().size());
@@ -202,7 +207,7 @@ class UserServicesTest {
         when(userRepository.save(user)).thenReturn(user);
         when(userMapper.toResponse(user)).thenReturn(response);
 
-        var result = services.updateUser(request, uuid);
+        var result = userServices.updateUser(request, uuid);
 
         assertNotNull(result);
     }
@@ -214,7 +219,7 @@ class UserServicesTest {
         when(userRepository.findById(uuid)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> services.updateUser(request, uuid));
+                () -> userServices.updateUser(request, uuid));
     }
 
     @Test
@@ -227,7 +232,7 @@ class UserServicesTest {
         when(userRepository.existsByUsernameAndIdNot(any(), any())).thenReturn(true);
 
         assertThrows(UsernameAlreadyExistsException.class,
-                () -> services.updateUser(request, uuid));
+                () -> userServices.updateUser(request, uuid));
     }
 
 
@@ -235,7 +240,7 @@ class UserServicesTest {
     void deleteUser_ShouldWork() {
         when(userRepository.findById(uuid)).thenReturn(Optional.of(user));
 
-        assertDoesNotThrow(() -> services.deleteUser(uuid));
+        assertDoesNotThrow(() -> userServices.deleteUser(uuid));
 
         verify(userRepository).delete(user);
     }
@@ -245,6 +250,6 @@ class UserServicesTest {
         when(userRepository.findById(uuid)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> services.deleteUser(uuid));
+                () -> userServices.deleteUser(uuid));
     }
 }

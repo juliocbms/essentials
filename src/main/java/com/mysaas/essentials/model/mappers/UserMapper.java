@@ -1,8 +1,8 @@
 package com.mysaas.essentials.model.mappers;
 
-import com.mysaas.essentials.model.dto.UsersDTOS.UserRegisterRequest;
-import com.mysaas.essentials.model.dto.UsersDTOS.UserRegisterResponse;
-import com.mysaas.essentials.model.dto.UsersDTOS.UserUpdateRequest;
+import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterRequest;
+import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterResponse;
+import com.mysaas.essentials.model.dto.UsersDTOS.Update.UserUpdateRequest;
 import com.mysaas.essentials.model.entities.User;
 import org.mapstruct.*;
 

@@ -1,4 +1,4 @@
-package com.mysaas.essentials.services;
+package com.mysaas.essentials.services.Users;
 
 import com.mysaas.essentials.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
