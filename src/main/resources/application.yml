@@ -17,7 +17,7 @@ spring:
   flyway:
     enabled: true
 spring-doc:
-  paths-to-match: /users/**
+  paths-to-match: /users/**, /auth/**, /admin/**
   swagger-ui:
     use-root-path: true
 

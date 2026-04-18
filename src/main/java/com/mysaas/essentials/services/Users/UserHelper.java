@@ -1,5 +1,6 @@
 package com.mysaas.essentials.services.Users;
 
+import com.mysaas.essentials.config.JWTUserData;
 import com.mysaas.essentials.model.entities.Role;
 import com.mysaas.essentials.model.entities.User;
 import com.mysaas.essentials.repository.RoleRepository;
@@ -43,7 +44,16 @@ class UserHelper {
     }
 
     User getAuthenticatedUserEntity() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        var principal = authentication.getPrincipal();
+
+        String email;
+
+        if (principal instanceof JWTUserData userData) {
+            email = userData.email();
+        } else {
+            email = principal.toString();
+        }
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(email));
     }

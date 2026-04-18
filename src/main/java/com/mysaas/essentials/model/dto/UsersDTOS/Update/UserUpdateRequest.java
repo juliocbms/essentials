@@ -5,7 +5,5 @@ import jakarta.validation.constraints.NotNull;
 
 public record UserUpdateRequest(
         @NotBlank(message = "Name is mandatory") String name,
-        @NotBlank(message = "Username is mandatory") String username,
-
-        @NotNull(message = "status is mandatory")boolean active) {
+        @NotBlank(message = "Username is mandatory") String username) {
 }

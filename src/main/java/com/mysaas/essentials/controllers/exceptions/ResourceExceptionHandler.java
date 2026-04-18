@@ -4,6 +4,7 @@ import com.mysaas.essentials.services.exceptions.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -43,6 +44,28 @@ public class ResourceExceptionHandler {
         String error = "Business rules error";
         HttpStatus status = HttpStatus.BAD_REQUEST;
         StandardError err = new StandardError(Instant.now(),status.value(),error,e.getMessage(),request.getRequestURI());
+        return ResponseEntity.status(status).body(err);
+    }
+
+    @ExceptionHandler(UnAtorizedeException.class)
+    public ResponseEntity<StandardError> semAcesso(UnAtorizedeException e, HttpServletRequest request){
+        String error = "UnAutorized Exception";
+        HttpStatus status = HttpStatus.FORBIDDEN;
+        StandardError err = new StandardError(Instant.now(),status.value(),error,e.getMessage(),request.getRequestURI());
+        return ResponseEntity.status(status).body(err);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<StandardError> accessDenied(AccessDeniedException e, HttpServletRequest request) {
+        String error = "Acesso negado";
+        HttpStatus status = HttpStatus.FORBIDDEN;
+        StandardError err = new StandardError(
+                Instant.now(),
+                status.value(),
+                error,
+                "Você não tem permissão para acessar este recurso.",
+                request.getRequestURI()
+        );
         return ResponseEntity.status(status).body(err);
     }
 

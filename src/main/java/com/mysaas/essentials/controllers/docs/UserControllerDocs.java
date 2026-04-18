@@ -23,12 +23,7 @@ public interface UserControllerDocs {
             @ApiResponse(
                     responseCode = "200",
                     description = "Usuário visto com sucesso",
-                    content = {
-                            @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = UserRegisterResponse.class)
-                            )
-                    }
+                    content = @Content(mediaType = "application/json")
             ),
             @ApiResponse(
                     responseCode = "400",
@@ -62,12 +57,7 @@ public interface UserControllerDocs {
             @ApiResponse(
                     responseCode = "200",
                     description = "Usuário atualizado com sucesso",
-                    content = {
-                            @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = UserRegisterResponse.class)
-                            )
-                    }
+                    content = @Content(mediaType = "application/json")
             ),
             @ApiResponse(
                     responseCode = "400",

@@ -1,5 +1,6 @@
 package com.mysaas.essentials.services.Users;
 
+import com.mysaas.essentials.config.JWTUserData;
 import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterRequest;
 import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterResponse;
 import com.mysaas.essentials.model.dto.UsersDTOS.Update.ChangePasswordRequest;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,8 +64,19 @@ public class AuthService {
         }
     }
 
+    @Transactional
     public void changePassword(ChangePasswordRequest request){
-        var user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email;
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof JWTUserData userData) {
+            email = userData.email();
+        } else {
+            email = principal.toString();
+        }
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
+
         if (!passwordEncoder.matches(request.oldPassword(), user.getPassword())) {
             throw new RuntimeException("Senha antiga incorreta.");
         }

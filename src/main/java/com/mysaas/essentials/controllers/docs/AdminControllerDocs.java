@@ -2,6 +2,8 @@ package com.mysaas.essentials.controllers.docs;
 
 import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterResponse;
 import com.mysaas.essentials.model.dto.UsersDTOS.Update.UserUpdateRequest;
+import com.mysaas.essentials.model.dto.UsersDTOS.Update.UserUpdateRoleRequest;
+import com.mysaas.essentials.model.dto.UsersDTOS.Update.UserUpdateStatusRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -171,4 +173,81 @@ public interface AdminControllerDocs {
             @PathVariable UUID id,
             @Valid @RequestBody UserUpdateRequest request
     );
+
+    @Operation(
+            summary = "Atualizar a role de um usuário",
+            description = "Atualiza a role de um usuário com base no ID informado."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Usuário atualizado com sucesso",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = UserRegisterResponse.class)
+                            )
+                    }
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Dados inválidos",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Não autorizado",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Usuário não encontrado",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Erro interno do servidor",
+                    content = @Content
+            )
+    })
+    public ResponseEntity<EntityModel<UserRegisterResponse>> updateRoleByUserID(@PathVariable UUID id, @Valid @RequestBody UserUpdateRoleRequest request);
+
+
+    @Operation(
+            summary = "Atualizar status de um usuário",
+            description = "Atualiza o status de um usuário com base no ID informado."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Usuário atualizado com sucesso",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = UserRegisterResponse.class)
+                            )
+                    }
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Dados inválidos",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Não autorizado",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Usuário não encontrado",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Erro interno do servidor",
+                    content = @Content
+            )
+    })
+    public  ResponseEntity<EntityModel<UserRegisterResponse>> updateStatusByUserId(@PathVariable UUID id, @Valid @RequestBody UserUpdateStatusRequest request);
 }

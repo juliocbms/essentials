@@ -5,6 +5,9 @@ package com.mysaas.essentials.services.Users;
 import com.mysaas.essentials.controllers.AdminController;
 import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterResponse;
 import com.mysaas.essentials.model.dto.UsersDTOS.Update.UserUpdateRequest;
+import com.mysaas.essentials.model.dto.UsersDTOS.Update.UserUpdateRoleRequest;
+import com.mysaas.essentials.model.dto.UsersDTOS.Update.UserUpdateStatusRequest;
+import com.mysaas.essentials.model.entities.Role;
 import com.mysaas.essentials.model.entities.User;
 import com.mysaas.essentials.model.mappers.UserMapper;
 import com.mysaas.essentials.repository.RoleRepository;
@@ -24,6 +27,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -68,7 +72,6 @@ public class UserService {
         userValidator.isUsernameValidForUpdate(request.username(), id);
 
         try {
-            updatedUser.setActive(request.active());
             userMapper.updateToEntity(request, updatedUser);
 
             User savedUser = userRepository.save(updatedUser);
@@ -100,6 +103,7 @@ public class UserService {
         return userModelAssembler.toModel(user);
     }
 
+    @Transactional
     public EntityModel<UserRegisterResponse> updateAuthenticatedUser(UserUpdateRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email)
@@ -108,11 +112,35 @@ public class UserService {
 
         try {
             user.setName(request.name());
-            user.setActive(request.active());
             logger.info("User with id: {} updated!", user.getId());
             userRepository.save(user);
             return userModelAssembler.toModel(user);
         } catch (IllegalArgumentException | DataIntegrityViolationException e) {
+            logger.error("Error: {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    public EntityModel<UserRegisterResponse> updateRoleByUser(UserUpdateRoleRequest request, UUID id){
+        User user = userHelper.findEntityOrThrow(id);
+        try {
+            user.setRoles((Set<Role>) request.role());
+            userRepository.save(user);
+            return userModelAssembler.toModel(user);
+        }
+        catch (IllegalArgumentException | DataIntegrityViolationException e) {
+            logger.error("Error: {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    public EntityModel<UserRegisterResponse> updateStatusByUser(UserUpdateStatusRequest request, UUID id){
+        User user    = userHelper.findEntityOrThrow(id);
+        try {
+            user.setActive(request.active());
+            userRepository.save(user);
+            return userModelAssembler.toModel(user);
+        }catch (IllegalArgumentException | DataIntegrityViolationException e) {
             logger.error("Error: {}", e.getMessage());
             throw e;
         }

@@ -100,11 +100,33 @@ public interface AuthControllerDocs {
             summary = "Fazer Logout",
             description = "Realiza o logout de um usuário no sistema."
     )
-    @ApiResponse(
-            responseCode = "204",
-            description = "Logout feito com sucesso",
-            content = @Content
-    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Logout feito com sucesso",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Dados inválidos",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Não autorizado",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Usuário já fez logout",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Erro interno do servidor",
+                    content = @Content
+            )
+    })
     public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response);
 
 
@@ -114,14 +136,9 @@ public interface AuthControllerDocs {
     )
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "201",
+                    responseCode = "204",
                     description = "Senha atualizada com sucesso",
-                    content = {
-                            @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = UserRegisterResponse.class)
-                            )
-                    }
+                    content = @Content
             ),
             @ApiResponse(
                     responseCode = "400",
