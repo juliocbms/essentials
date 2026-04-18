@@ -32,8 +32,8 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(a -> a
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
-                        .requestMatchers(HttpMethod.POST,"/users/login").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/users/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
                         .anyRequest().permitAll()
                 ).
                 addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)

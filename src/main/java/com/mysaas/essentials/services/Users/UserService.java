@@ -2,20 +2,20 @@ package com.mysaas.essentials.services.Users;
 
 
 
-import com.mysaas.essentials.controllers.UserController;
-import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterRequest;
+import com.mysaas.essentials.controllers.AdminController;
 import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterResponse;
 import com.mysaas.essentials.model.dto.UsersDTOS.Update.UserUpdateRequest;
 import com.mysaas.essentials.model.entities.User;
 import com.mysaas.essentials.model.mappers.UserMapper;
 import com.mysaas.essentials.repository.RoleRepository;
 import com.mysaas.essentials.repository.UserRepository;
-import com.mysaas.essentials.services.exceptions.EmailAlreadyExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -52,7 +52,7 @@ public class UserService {
         List<User> users = userRepository.findAll();
 
         return userModelAssembler.toCollectionModel(users)
-                .add(linkTo(methodOn(UserController.class).getAllUsers())
+                .add(linkTo(methodOn(AdminController.class).getAllUsers())
                         .withSelfRel()
                         .withType("GET"));
     }
@@ -89,6 +89,29 @@ public class UserService {
         try {
             logger.info("User with id: {} deleted", id);
             userRepository.delete(user);
+        } catch (IllegalArgumentException | DataIntegrityViolationException e) {
+            logger.error("Error: {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    public EntityModel<UserRegisterResponse> getAuthenticatedUser() {
+        User user = userHelper.getAuthenticatedUserEntity();
+        return userModelAssembler.toModel(user);
+    }
+
+    public EntityModel<UserRegisterResponse> updateAuthenticatedUser(UserUpdateRequest request) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException(email));
+        userValidator.isUsernameValidForUpdate(request.username(), user.getId());
+
+        try {
+            user.setName(request.name());
+            user.setActive(request.active());
+            logger.info("User with id: {} updated!", user.getId());
+            userRepository.save(user);
+            return userModelAssembler.toModel(user);
         } catch (IllegalArgumentException | DataIntegrityViolationException e) {
             logger.error("Error: {}", e.getMessage());
             throw e;

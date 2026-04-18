@@ -1,6 +1,6 @@
 package com.mysaas.essentials.services.Users;
 
-import com.mysaas.essentials.controllers.UserController;
+import com.mysaas.essentials.controllers.AdminController;
 import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterResponse;
 import com.mysaas.essentials.model.entities.User;
 import com.mysaas.essentials.model.mappers.UserMapper;
@@ -26,19 +26,19 @@ public class UserModelAssembler implements RepresentationModelAssembler<User, En
         UserRegisterResponse dto = userMapper.toResponse(entity);
 
         return EntityModel.of(dto,
-                linkTo(methodOn(UserController.class).getUserById(entity.getId()))
+                linkTo(methodOn(AdminController.class).getUserById(entity.getId()))
                         .withSelfRel()
                         .withType("GET"),
 
-                linkTo(methodOn(UserController.class).getAllUsers())
+                linkTo(methodOn(AdminController.class).getAllUsers())
                         .withRel("all-users")
                         .withType("GET"),
 
-                linkTo(methodOn(UserController.class).updateUserById(entity.getId(), null))
+                linkTo(methodOn(AdminController.class).updateUserById(entity.getId(), null))
                         .withRel("update")
                         .withType("PUT"),
 
-                linkTo(methodOn(UserController.class).deledUserById(entity.getId()))
+                linkTo(methodOn(AdminController.class).deleteUserById(entity.getId()))
                         .withRel("delete")
                         .withType("DELETE"));
     }

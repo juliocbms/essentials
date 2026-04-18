@@ -8,67 +8,21 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
+import org.springframework.web.bind.annotation.RequestBody;
 
 public interface UserControllerDocs {
 
 
-
-
-
-
-
     @Operation(
-            summary = "Buscar usuário por ID",
-            description = "Retorna os dados de um usuário com base no ID informado."
+            summary = "Ver meu usuário",
+            description = "Ver meu usuário informado."
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Usuário encontrado com sucesso",
-                    content = {
-                            @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = UserRegisterResponse.class)
-                            )
-                    }
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Requisição inválida",
-                    content = @Content
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Não autorizado",
-                    content = @Content
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Usuário não encontrado",
-                    content = @Content
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "Erro interno do servidor",
-                    content = @Content
-            )
-    })
-    ResponseEntity<EntityModel<UserRegisterResponse>> getUserById(@PathVariable UUID id);
-
-    @Operation(
-            summary = "Buscar todos usuários",
-            description = "Pesquisa todos os usuários"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Lista de usuários retornada com sucesso",
+                    description = "Usuário visto com sucesso",
                     content = {
                             @Content(
                                     mediaType = "application/json",
@@ -88,7 +42,7 @@ public interface UserControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Usuários não encontrado",
+                    description = "Usuário não encontrado",
                     content = @Content
             ),
             @ApiResponse(
@@ -97,12 +51,12 @@ public interface UserControllerDocs {
                     content = @Content
             )
     })
-    ResponseEntity<CollectionModel<EntityModel<UserRegisterResponse>>> getAllUsers();
+    public ResponseEntity<EntityModel<UserRegisterResponse>> getMyProfile();
 
 
     @Operation(
             summary = "Atualizar usuário",
-            description = "Atualiza os dados de um usuário com base no ID informado."
+            description = "Atualiza os dados de um usuário informado."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -136,42 +90,6 @@ public interface UserControllerDocs {
                     content = @Content
             )
     })
-    ResponseEntity<EntityModel<UserRegisterResponse>> updateUserById(
-            @PathVariable UUID id,
-            @Valid @RequestBody UserUpdateRequest request
-    );
+    public ResponseEntity<EntityModel<UserRegisterResponse>>  updateMyUserProfile(@Valid @RequestBody UserUpdateRequest request);
 
-
-    @Operation(
-            summary = "Remover usuário",
-            description = "Remove um usuário com base no ID informado."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "204",
-                    description = "Usuário removido com sucesso",
-                    content = @Content
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Requisição inválida",
-                    content = @Content
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Não autorizado",
-                    content = @Content
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Usuário não encontrado",
-                    content = @Content
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "Erro interno do servidor",
-                    content = @Content
-            )
-    })
-    ResponseEntity<Void> deledUserById(@PathVariable UUID id);
 }

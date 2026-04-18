@@ -7,6 +7,8 @@ import com.mysaas.essentials.repository.UserRepository;
 import com.mysaas.essentials.services.exceptions.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -38,5 +40,11 @@ class UserHelper {
 
      void addDefaultRole(User user) {
         user.getRoles().add(findDefaultRole());
+    }
+
+    User getAuthenticatedUserEntity() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException(email));
     }
 }

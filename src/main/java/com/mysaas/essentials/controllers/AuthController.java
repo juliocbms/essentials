@@ -9,7 +9,7 @@ import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterResponse;
 import com.mysaas.essentials.model.dto.UsersDTOS.Update.ChangePasswordRequest;
 import com.mysaas.essentials.model.entities.User;
 import com.mysaas.essentials.services.Users.AuthService;
-import com.mysaas.essentials.services.Users.UserService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Auth",description = "Endpoints for Auth")
 public class AuthController implements AuthControllerDocs {
 
     private final AuthService authService;
@@ -41,7 +42,7 @@ public class AuthController implements AuthControllerDocs {
     }
 
 
-    @PostMapping("/users/login")
+    @PostMapping("/login")
     @Override
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         UsernamePasswordAuthenticationToken userAndPass =
@@ -55,7 +56,7 @@ public class AuthController implements AuthControllerDocs {
         return ResponseEntity.ok(new LoginResponse(token));
     }
 
-    @PostMapping("/users/register")
+    @PostMapping("/register")
     @Override
     public ResponseEntity<EntityModel<UserRegisterResponse>> insertUser(
             @Valid @RequestBody UserRegisterRequest userRegisterRequest
@@ -64,7 +65,8 @@ public class AuthController implements AuthControllerDocs {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PostMapping("/users/logout")
+    @PostMapping("/user/logout")
+    @Override
     public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null) {
@@ -75,6 +77,7 @@ public class AuthController implements AuthControllerDocs {
 
 
     @PostMapping("/user/change-password")
+    @Override
     public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordRequest request) {
         authService.changePassword(request);
         return ResponseEntity.ok().build();

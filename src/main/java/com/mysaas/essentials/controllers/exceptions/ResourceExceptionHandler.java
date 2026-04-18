@@ -1,9 +1,6 @@
 package com.mysaas.essentials.controllers.exceptions;
 
-import com.mysaas.essentials.services.exceptions.EmailAlreadyExistsException;
-import com.mysaas.essentials.services.exceptions.RegraNegocioException;
-import com.mysaas.essentials.services.exceptions.ResourceNotFoundException;
-import com.mysaas.essentials.services.exceptions.UsernameAlreadyExistsException;
+import com.mysaas.essentials.services.exceptions.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,13 +46,13 @@ public class ResourceExceptionHandler {
         return ResponseEntity.status(status).body(err);
     }
 
-//    @ExceptionHandler(RegraNegocioException.class)
-//    public ResponseEntity<StandardError> acessoNegado(RegraNegocioException e, HttpServletRequest request){
-//        String error = "Business rules error";
-//        HttpStatus status = HttpStatus.FORBIDDEN;
-//        StandardError err = new StandardError(Instant.now(),status.value(),error,e.getMessage(),request.getRequestURI());
-//        return ResponseEntity.status(status).body(err);
-//    }
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<StandardError> userNotFound(UserNotFoundException e, HttpServletRequest request){
+        String error = "User Not Founded";
+        HttpStatus status = HttpStatus.FORBIDDEN;
+        StandardError err = new StandardError(Instant.now(),status.value(),error,e.getMessage(),request.getRequestURI());
+        return ResponseEntity.status(status).body(err);
+    }
 
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
