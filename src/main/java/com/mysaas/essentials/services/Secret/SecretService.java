@@ -38,13 +38,14 @@ public class SecretService {
         try {
             encryptedData = encryptionService.encrypt(request.secretValue());
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            logger.error("Falha ao criptografar segredo: {}", e.getMessage());
+            throw new RuntimeException("Erro interno ao processar segurança.");
         }
 
         Secret newsecret = secretMapper.toEntity(request);
         newsecret.setSecretEncryptedValue(encryptedData.value());
         newsecret.setInitializationVector(encryptedData.iv());
-        newsecret.setKeyVersion(request.keyVersion());
+        newsecret.setKeyVersion(1);
         newsecret.setActive(true);
 
         try {

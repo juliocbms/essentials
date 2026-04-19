@@ -14,10 +14,6 @@ public interface SecretMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "secretEncryptedValue", ignore = true)
     @Mapping(target = "initializationVector", ignore = true)
-    @Mapping(target = "active", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "keyVersion", ignore = true)
     Secret toEntity(CreateSecretRequest request);
 
