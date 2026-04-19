@@ -1,7 +1,9 @@
 package com.mysaas.essentials.model.dto.UsersDTOS.Update;
 
-import com.mysaas.essentials.model.entities.Role;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
 
-public record UserUpdateRoleRequest(@NotNull(message = "Role is mandatory")Role role) {
+import java.util.Set;
+
+
+public record UserUpdateRoleRequest(@NotEmpty Set<String> roles) {
 }

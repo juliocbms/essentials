@@ -12,6 +12,8 @@ import com.mysaas.essentials.model.entities.User;
 import com.mysaas.essentials.model.mappers.UserMapper;
 import com.mysaas.essentials.repository.RoleRepository;
 import com.mysaas.essentials.repository.UserRepository;
+import com.mysaas.essentials.services.exceptions.ResourceNotFoundException;
+import com.mysaas.essentials.services.exceptions.RoleNotFoundedExcpetion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -29,24 +31,25 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final PasswordEncoder passwordEncoder;
     private final UserValidator userValidator;
+    private final RoleRepository roleRepository;
     private final UserHelper userHelper;
     private final UserModelAssembler userModelAssembler;
     private Logger logger = LoggerFactory.getLogger(UserService.class.getName());
 
-    public UserService(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder, RoleRepository roleRepository, UserValidator userValidator, UserHelper userHelper, UserModelAssembler userModelAssembler){
+    public UserService(UserRepository userRepository, UserMapper userMapper, RoleRepository roleRepository, UserValidator userValidator, RoleRepository roleRepository1, UserHelper userHelper, UserModelAssembler userModelAssembler){
 
         this.userRepository = userRepository;
         this.userMapper = userMapper;
-        this.passwordEncoder = passwordEncoder;
         this.userValidator = userValidator;
+        this.roleRepository = roleRepository1;
         this.userHelper = userHelper;
         this.userModelAssembler = userModelAssembler;
     }
@@ -124,8 +127,14 @@ public class UserService {
     public EntityModel<UserRegisterResponse> updateRoleByUser(UserUpdateRoleRequest request, UUID id){
         User user = userHelper.findEntityOrThrow(id);
         try {
-            user.setRoles((Set<Role>) request.role());
+            Set<Role> rolesFromDb = request.roles().stream()
+                    .map(roleName -> roleRepository.findByName(roleName)
+                            .orElseThrow(() -> new RoleNotFoundedExcpetion("Role não encontrada: " + roleName)))
+                    .collect(Collectors.toSet());
+            user.setRoles(rolesFromDb);
             userRepository.save(user);
+            logger.info("Roles do usuário {} atualizadas com sucesso!", id);
+
             return userModelAssembler.toModel(user);
         }
         catch (IllegalArgumentException | DataIntegrityViolationException e) {

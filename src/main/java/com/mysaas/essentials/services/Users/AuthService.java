@@ -8,6 +8,8 @@ import com.mysaas.essentials.model.entities.User;
 import com.mysaas.essentials.model.mappers.UserMapper;
 import com.mysaas.essentials.repository.UserRepository;
 import com.mysaas.essentials.services.exceptions.EmailAlreadyExistsException;
+import com.mysaas.essentials.services.exceptions.InvalidPasswordException;
+import com.mysaas.essentials.services.exceptions.PasswordsDoNotMatchException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -78,10 +80,10 @@ public class AuthService {
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
 
         if (!passwordEncoder.matches(request.oldPassword(), user.getPassword())) {
-            throw new RuntimeException("Senha antiga incorreta.");
+            throw new InvalidPasswordException("Senha antiga incorreta.");
         }
         if (!request.newPassword().equals(request.confirmPassword())) {
-            throw new RuntimeException("As senhas não coincidem.");
+            throw new PasswordsDoNotMatchException("As senhas não coincidem.");
         }
         user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);

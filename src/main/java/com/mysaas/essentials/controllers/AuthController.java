@@ -46,6 +46,7 @@ public class AuthController implements AuthControllerDocs {
     @PostMapping("/login")
     @Override
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+
         UsernamePasswordAuthenticationToken userAndPass =
                 new UsernamePasswordAuthenticationToken(request.email(), request.password());
 
