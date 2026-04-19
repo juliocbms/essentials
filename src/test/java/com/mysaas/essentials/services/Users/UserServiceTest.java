@@ -3,10 +3,8 @@ package com.mysaas.essentials.services.Users;
 import com.mysaas.essentials.mocks.MockUser;
 import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterResponse;
 import com.mysaas.essentials.model.dto.UsersDTOS.Update.UserUpdateRequest;
-import com.mysaas.essentials.model.entities.Role;
 import com.mysaas.essentials.model.entities.User;
 import com.mysaas.essentials.model.mappers.UserMapper;
-import com.mysaas.essentials.repository.RoleRepository;
 import com.mysaas.essentials.repository.UserRepository;
 import com.mysaas.essentials.services.exceptions.ResourceNotFoundException;
 import com.mysaas.essentials.services.exceptions.UsernameAlreadyExistsException;
@@ -16,13 +14,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -68,12 +68,23 @@ class UserServiceTest {
     void getAllUsers_ShouldReturnList() {
         User user2 = input.mockEntity(2);
         List<User> users = List.of(user, user2);
-        when(userRepository.findAll()).thenReturn(users);
-        when(userModelAssembler.toCollectionModel(users)).thenReturn(CollectionModel.of(List.of(EntityModel.of(response))));
-        var result = userService.getAllUsers();
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Page<User> page = new PageImpl<>(users);
+
+        when(userRepository.findAll(any(Pageable.class))).thenReturn(page);
+
+        when(userModelAssembler.toModel(any(User.class)))
+                .thenReturn(EntityModel.of(response));
+
+        var result = userService.getAllUsers(pageable);
+
         assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-        verify(userModelAssembler).toCollectionModel(users);
+        assertEquals(2, result.getContent().size());
+
+        verify(userRepository).findAll(any(Pageable.class));
+        verify(userModelAssembler, times(2)).toModel(any(User.class));
     }
 
     @Test

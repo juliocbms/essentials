@@ -30,7 +30,7 @@ public class UserModelAssembler implements RepresentationModelAssembler<User, En
                         .withSelfRel()
                         .withType("GET"),
 
-                linkTo(methodOn(AdminController.class).getAllUsers())
+                linkTo(methodOn(AdminController.class).getAllUsers(0,12,"asc"))
                         .withRel("all-users")
                         .withType("GET"),
 

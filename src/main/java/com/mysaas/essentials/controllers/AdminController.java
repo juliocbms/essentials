@@ -8,7 +8,11 @@ import com.mysaas.essentials.model.dto.UsersDTOS.Update.UserUpdateStatusRequest;
 import com.mysaas.essentials.services.Users.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.hateoas.CollectionModel;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,6 +24,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/admin")
 @Tag(name = "Admin",description = "Endpoints for Admins")
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 public class AdminController implements AdminControllerDocs {
 
     private final UserService userService;
@@ -31,8 +36,12 @@ public class AdminController implements AdminControllerDocs {
     @GetMapping("/allusers")
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<CollectionModel<EntityModel<UserRegisterResponse>>> getAllUsers() {
-        CollectionModel<EntityModel<UserRegisterResponse>> response = userService.getAllUsers();
+    public ResponseEntity<Page<EntityModel<UserRegisterResponse>>> getAllUsers(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                                                               @RequestParam(value = "size", defaultValue = "12") Integer size,
+                                                                               @RequestParam(value = "direction", defaultValue = "asc") String direction) {
+        var sortDirection = "desc".equalsIgnoreCase(direction) ? Direction.DESC : Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection,"name"));
+        Page<EntityModel<UserRegisterResponse>> response = userService.getAllUsers(pageable);
         return ResponseEntity.ok(response);
     }
 

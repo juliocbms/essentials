@@ -12,16 +12,17 @@ import com.mysaas.essentials.model.entities.User;
 import com.mysaas.essentials.model.mappers.UserMapper;
 import com.mysaas.essentials.repository.RoleRepository;
 import com.mysaas.essentials.repository.UserRepository;
-import com.mysaas.essentials.services.exceptions.ResourceNotFoundException;
 import com.mysaas.essentials.services.exceptions.RoleNotFoundedExcpetion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -55,13 +56,11 @@ public class UserService {
     }
 
 
-    public CollectionModel<EntityModel<UserRegisterResponse>> getAllUsers() {
-        List<User> users = userRepository.findAll();
+    public Page<EntityModel<UserRegisterResponse>> getAllUsers(Pageable pageable) {
 
-        return userModelAssembler.toCollectionModel(users)
-                .add(linkTo(methodOn(AdminController.class).getAllUsers())
-                        .withSelfRel()
-                        .withType("GET"));
+        var users = userRepository.findAll(pageable);
+
+        return users.map(userModelAssembler::toModel);
     }
 
     public EntityModel<UserRegisterResponse> getUserById(UUID id) {

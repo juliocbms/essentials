@@ -10,11 +10,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.UUID;
 
@@ -95,7 +97,9 @@ public interface AdminControllerDocs {
                     content = @Content
             )
     })
-    ResponseEntity<CollectionModel<EntityModel<UserRegisterResponse>>> getAllUsers();
+    ResponseEntity<Page<EntityModel<UserRegisterResponse>>> getAllUsers(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                                                        @RequestParam(value = "size", defaultValue = "12") Integer size,
+                                                                        @RequestParam(value = "direction", defaultValue = "asc") String direction);
 
 
     @Operation(
