@@ -2,11 +2,11 @@ package com.mysaas.essentials.controllers;
 
 import com.mysaas.essentials.config.TokenConfig;
 import com.mysaas.essentials.controllers.docs.AuthControllerDocs;
-import com.mysaas.essentials.model.dto.UsersDTOS.Login.LoginRequest;
-import com.mysaas.essentials.model.dto.UsersDTOS.Login.LoginResponse;
-import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterRequest;
-import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterResponse;
-import com.mysaas.essentials.model.dto.UsersDTOS.Update.ChangePasswordRequest;
+import com.mysaas.essentials.model.dto.auth.ChangePasswordRequest;
+import com.mysaas.essentials.model.dto.auth.LoginRequest;
+import com.mysaas.essentials.model.dto.auth.LoginResponse;
+import com.mysaas.essentials.model.dto.user.CreateUserRequest;
+import com.mysaas.essentials.model.dto.user.UserResponse;
 import com.mysaas.essentials.model.entities.User;
 import com.mysaas.essentials.services.Users.AuthService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -60,10 +60,10 @@ public class AuthController implements AuthControllerDocs {
 
     @PostMapping("/register")
     @Override
-    public ResponseEntity<EntityModel<UserRegisterResponse>> insertUser(
-            @Valid @RequestBody UserRegisterRequest userRegisterRequest
+    public ResponseEntity<EntityModel<UserResponse>> insertUser(
+            @Valid @RequestBody CreateUserRequest userRegisterRequest
     ) {
-        EntityModel<UserRegisterResponse> response = authService.insertUser(userRegisterRequest);
+        EntityModel<UserResponse> response = authService.insertUser(userRegisterRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

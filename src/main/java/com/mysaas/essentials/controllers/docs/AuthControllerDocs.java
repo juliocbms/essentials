@@ -1,10 +1,10 @@
 package com.mysaas.essentials.controllers.docs;
 
-import com.mysaas.essentials.model.dto.UsersDTOS.Login.LoginRequest;
-import com.mysaas.essentials.model.dto.UsersDTOS.Login.LoginResponse;
-import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterRequest;
-import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterResponse;
-import com.mysaas.essentials.model.dto.UsersDTOS.Update.ChangePasswordRequest;
+import com.mysaas.essentials.model.dto.auth.ChangePasswordRequest;
+import com.mysaas.essentials.model.dto.auth.LoginRequest;
+import com.mysaas.essentials.model.dto.auth.LoginResponse;
+import com.mysaas.essentials.model.dto.user.CreateUserRequest;
+import com.mysaas.essentials.model.dto.user.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -65,7 +65,7 @@ public interface AuthControllerDocs {
                     content = {
                             @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = UserRegisterResponse.class)
+                            schema = @Schema(implementation = UserResponse.class)
                             )
                     }
             ),
@@ -90,8 +90,8 @@ public interface AuthControllerDocs {
                     content = @Content
             )
     })
-    ResponseEntity<EntityModel<UserRegisterResponse>> insertUser(
-            @Valid @RequestBody UserRegisterRequest userRegisterRequest
+    ResponseEntity<EntityModel<UserResponse>> insertUser(
+            @Valid @RequestBody CreateUserRequest userRegisterRequest
     );
 
 

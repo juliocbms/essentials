@@ -1,11 +1,12 @@
 package com.mysaas.essentials.mocks;
 
-import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterResponse;
+import com.mysaas.essentials.model.dto.user.UserResponse;
 import com.mysaas.essentials.model.entities.User;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class MockUser {
@@ -14,7 +15,7 @@ public class MockUser {
         return mockEntity(0);
     }
 
-    public UserRegisterResponse mockDTO() {
+    public UserResponse mockDTO() {
         return mockDTO(0);
     }
 
@@ -26,8 +27,8 @@ public class MockUser {
         return users;
     }
 
-    public List<UserRegisterResponse> mockDTOList() {
-        List<UserRegisterResponse> users = new ArrayList<>();
+    public List<UserResponse> mockDTOList() {
+        List<UserResponse> users = new ArrayList<>();
         for (int i = 0; i < 14; i++) {
             users.add(mockDTO(i));
         }
@@ -47,12 +48,18 @@ public class MockUser {
         return user;
     }
 
-    public UserRegisterResponse mockDTO(Integer number) {
-        return new UserRegisterResponse(
+    public UserResponse mockDTO(Integer number) {
+        return new UserResponse(
+                UUID.randomUUID(),
                 "User Test " + number,
                 "user" + number + "@test.com",
+                "user" + number,
+                (number % 2) == 0,
+                false,
                 LocalDateTime.now(),
-                (number % 2) == 0
+                LocalDateTime.now(),
+                null,
+                Set.of("ROLE_USER")
         );
     }
 }

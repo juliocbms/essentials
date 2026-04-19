@@ -1,8 +1,8 @@
 package com.mysaas.essentials.services.Users;
 
 import com.mysaas.essentials.mocks.MockUser;
-import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterResponse;
-import com.mysaas.essentials.model.dto.UsersDTOS.Update.UserUpdateRequest;
+import com.mysaas.essentials.model.dto.user.UpdateUserRequest;
+import com.mysaas.essentials.model.dto.user.UserResponse;
 import com.mysaas.essentials.model.entities.User;
 import com.mysaas.essentials.model.mappers.UserMapper;
 import com.mysaas.essentials.repository.UserRepository;
@@ -18,8 +18,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -50,9 +52,12 @@ class UserServiceTest {
     @Mock
     private UserModelAssembler userModelAssembler;
 
+    @Mock
+    private PagedResourcesAssembler<User> pagedResourcesAssembler;
+
     private MockUser input;
     private User user;
-    private UserRegisterResponse response;
+    private UserResponse response;
     private UUID uuid;
 
     @BeforeEach
@@ -61,30 +66,27 @@ class UserServiceTest {
         uuid = UUID.randomUUID();
         user = input.mockEntity(1);
         user.setId(uuid);
-        response = new UserRegisterResponse("User Test 1", "user@test.com", LocalDateTime.now(), true);
+        response = new UserResponse(uuid, "User Test 1", "user@test.com", "user1", true, false, LocalDateTime.now(), LocalDateTime.now(), null, java.util.Set.of("ROLE_USER"));
     }
 
     @Test
     void getAllUsers_ShouldReturnList() {
-        User user2 = input.mockEntity(2);
-        List<User> users = List.of(user, user2);
-
         Pageable pageable = PageRequest.of(0, 10);
+        Page<User> userPage = new PageImpl<>(List.of(user));
+        PagedModel<EntityModel<UserResponse>> pagedModel = PagedModel.of(
+                List.of(EntityModel.of(response)),
+                new PagedModel.PageMetadata(10, 0, 1)
+        );
 
-        Page<User> page = new PageImpl<>(users);
+        when(userRepository.findAll(pageable)).thenReturn(userPage);
 
-        when(userRepository.findAll(any(Pageable.class))).thenReturn(page);
+        when(pagedResourcesAssembler.toModel(eq(userPage), any(UserModelAssembler.class)))
+                .thenReturn(pagedModel);
 
-        when(userModelAssembler.toModel(any(User.class)))
-                .thenReturn(EntityModel.of(response));
-
-        var result = userService.getAllUsers(pageable,null);
+        var result = userService.getAllUsers(pageable, pagedResourcesAssembler);
 
         assertNotNull(result);
-        assertEquals(2, result.getContent().size());
-
-        verify(userRepository).findAll(any(Pageable.class));
-        verify(userModelAssembler, times(2)).toModel(any(User.class));
+        assertEquals(1, result.getContent().size());
     }
 
     @Test
@@ -106,7 +108,7 @@ class UserServiceTest {
 
     @Test
     void updateUser_ShouldReturnSuccess() {
-        UserUpdateRequest request = mock(UserUpdateRequest.class);
+        UpdateUserRequest request = mock(UpdateUserRequest.class);
         when(request.username()).thenReturn("user");
         when(userHelper.findEntityOrThrow(uuid)).thenReturn(user);
         when(userRepository.save(user)).thenReturn(user);
@@ -118,14 +120,14 @@ class UserServiceTest {
 
     @Test
     void updateUser_ShouldThrowNotFound() {
-        UserUpdateRequest request = mock(UserUpdateRequest.class);
+        UpdateUserRequest request = mock(UpdateUserRequest.class);
         when(userHelper.findEntityOrThrow(uuid)).thenThrow(new ResourceNotFoundException(uuid));
         assertThrows(ResourceNotFoundException.class, () -> userService.updateUser(request, uuid));
     }
 
     @Test
     void updateUser_ShouldThrowUsernameException() {
-        UserUpdateRequest request = mock(UserUpdateRequest.class);
+        UpdateUserRequest request = mock(UpdateUserRequest.class);
         when(request.username()).thenReturn("user_error");
         when(userHelper.findEntityOrThrow(uuid)).thenReturn(user);
         doThrow(new UsernameAlreadyExistsException("user_error"))

@@ -3,10 +3,10 @@ package com.mysaas.essentials.services.Users;
 
 
 import com.mysaas.essentials.controllers.AdminController;
-import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterResponse;
-import com.mysaas.essentials.model.dto.UsersDTOS.Update.UserUpdateRequest;
-import com.mysaas.essentials.model.dto.UsersDTOS.Update.UserUpdateRoleRequest;
-import com.mysaas.essentials.model.dto.UsersDTOS.Update.UserUpdateStatusRequest;
+import com.mysaas.essentials.model.dto.user.UpdateUserRequest;
+import com.mysaas.essentials.model.dto.user.UpdateUserRoleRequest;
+import com.mysaas.essentials.model.dto.user.UpdateUserStatusRequest;
+import com.mysaas.essentials.model.dto.user.UserResponse;
 import com.mysaas.essentials.model.entities.Role;
 import com.mysaas.essentials.model.entities.User;
 import com.mysaas.essentials.model.mappers.UserMapper;
@@ -45,7 +45,7 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final UserHelper userHelper;
     private final UserModelAssembler userModelAssembler;
-    PagedResourcesAssembler<UserRegisterResponse> assembler;
+    PagedResourcesAssembler<UserResponse> assembler;
     private Logger logger = LoggerFactory.getLogger(UserService.class.getName());
 
     public UserService(UserRepository userRepository, UserMapper userMapper, RoleRepository roleRepository, UserValidator userValidator, RoleRepository roleRepository1, UserHelper userHelper, UserModelAssembler userModelAssembler){
@@ -59,7 +59,7 @@ public class UserService {
     }
 
 
-    public PagedModel<EntityModel<UserRegisterResponse>> getAllUsers(
+    public PagedModel<EntityModel<UserResponse>> getAllUsers(
             Pageable pageable,
             PagedResourcesAssembler<User> pagedResourcesAssembler) {
 
@@ -68,13 +68,24 @@ public class UserService {
         return pagedResourcesAssembler.toModel(users, userModelAssembler);
     }
 
-    public EntityModel<UserRegisterResponse> getUserById(UUID id) {
+    public PagedModel<EntityModel<UserResponse>> findByName(
+            String name,
+            Pageable pageable,
+            PagedResourcesAssembler<User> pagedResourcesAssembler) {
+
+        Page<User> users = userRepository.findUsersByName(name,pageable);
+
+        return pagedResourcesAssembler.toModel(users, userModelAssembler);
+    }
+
+    public EntityModel<UserResponse> getUserById(UUID id) {
         User user = userHelper.findEntityOrThrow(id);
         return userModelAssembler.toModel(user);
     }
 
+
     @Transactional
-    public EntityModel<UserRegisterResponse> updateUser(UserUpdateRequest request, UUID id) {
+    public EntityModel<UserResponse> updateUser(UpdateUserRequest request, UUID id) {
         User updatedUser = userHelper.findEntityOrThrow(id);
         userValidator.isUsernameValidForUpdate(request.username(), id);
 
@@ -105,13 +116,13 @@ public class UserService {
         }
     }
 
-    public EntityModel<UserRegisterResponse> getAuthenticatedUser() {
+    public EntityModel<UserResponse> getAuthenticatedUser() {
         User user = userHelper.getAuthenticatedUserEntity();
         return userModelAssembler.toModel(user);
     }
 
     @Transactional
-    public EntityModel<UserRegisterResponse> updateAuthenticatedUser(UserUpdateRequest request) {
+    public EntityModel<UserResponse> updateAuthenticatedUser(UpdateUserRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(email));
@@ -128,7 +139,7 @@ public class UserService {
         }
     }
 
-    public EntityModel<UserRegisterResponse> updateRoleByUser(UserUpdateRoleRequest request, UUID id){
+    public EntityModel<UserResponse> updateRoleByUser(UpdateUserRoleRequest request, UUID id){
         User user = userHelper.findEntityOrThrow(id);
         try {
             Set<Role> rolesFromDb = request.roles().stream()
@@ -147,7 +158,7 @@ public class UserService {
         }
     }
 
-    public EntityModel<UserRegisterResponse> updateStatusByUser(UserUpdateStatusRequest request, UUID id){
+    public EntityModel<UserResponse> updateStatusByUser(UpdateUserStatusRequest request, UUID id){
         User user    = userHelper.findEntityOrThrow(id);
         try {
             user.setActive(request.active());

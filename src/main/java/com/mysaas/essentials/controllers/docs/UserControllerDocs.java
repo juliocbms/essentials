@@ -1,7 +1,7 @@
 package com.mysaas.essentials.controllers.docs;
 
-import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterResponse;
-import com.mysaas.essentials.model.dto.UsersDTOS.Update.UserUpdateRequest;
+import com.mysaas.essentials.model.dto.user.UpdateUserRequest;
+import com.mysaas.essentials.model.dto.user.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -46,7 +46,7 @@ public interface UserControllerDocs {
                     content = @Content
             )
     })
-    public ResponseEntity<EntityModel<UserRegisterResponse>> getMyProfile();
+    public ResponseEntity<EntityModel<UserResponse>> getMyProfile();
 
 
     @Operation(
@@ -80,6 +80,6 @@ public interface UserControllerDocs {
                     content = @Content
             )
     })
-    public ResponseEntity<EntityModel<UserRegisterResponse>>  updateMyUserProfile(@Valid @RequestBody UserUpdateRequest request);
+    public ResponseEntity<EntityModel<UserResponse>>  updateMyUserProfile(@Valid @RequestBody UpdateUserRequest request);
 
 }

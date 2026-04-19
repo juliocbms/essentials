@@ -6,11 +6,9 @@ import com.mysaas.essentials.services.exceptions.EmailAlreadyExistsException;
 import com.mysaas.essentials.services.exceptions.UsernameAlreadyExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-@Component
 class UserValidator {
 
 

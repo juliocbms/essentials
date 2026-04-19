@@ -1,7 +1,7 @@
 package com.mysaas.essentials.services.Users;
 
 import com.mysaas.essentials.controllers.AdminController;
-import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterResponse;
+import com.mysaas.essentials.model.dto.user.UserResponse;
 import com.mysaas.essentials.model.entities.User;
 import com.mysaas.essentials.model.mappers.UserMapper;
 import org.springframework.hateoas.CollectionModel;
@@ -13,7 +13,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class UserModelAssembler implements RepresentationModelAssembler<User, EntityModel<UserRegisterResponse>> {
+public class UserModelAssembler implements RepresentationModelAssembler<User, EntityModel<UserResponse>> {
 
     private final UserMapper userMapper;
 
@@ -22,15 +22,15 @@ public class UserModelAssembler implements RepresentationModelAssembler<User, En
     }
 
     @Override
-    public EntityModel<UserRegisterResponse> toModel(User entity) {
-        UserRegisterResponse dto = userMapper.toResponse(entity);
+    public EntityModel<UserResponse> toModel(User entity) {
+        UserResponse dto = userMapper.toResponse(entity);
 
         return EntityModel.of(dto,
                 linkTo(methodOn(AdminController.class).getUserById(entity.getId()))
                         .withSelfRel()
                         .withType("GET"),
 
-                linkTo(methodOn(AdminController.class).getAllUsers(0,12,"asc",null))
+                linkTo(methodOn(AdminController.class).getAllUsers(0,12,"asc",null,null))
                         .withRel("all-users")
                         .withType("GET"),
 
@@ -44,7 +44,7 @@ public class UserModelAssembler implements RepresentationModelAssembler<User, En
     }
 
     @Override
-    public CollectionModel<EntityModel<UserRegisterResponse>> toCollectionModel(Iterable<? extends User> entities) {
+    public CollectionModel<EntityModel<UserResponse>> toCollectionModel(Iterable<? extends User> entities) {
         return RepresentationModelAssembler.super.toCollectionModel(entities);
     }
 

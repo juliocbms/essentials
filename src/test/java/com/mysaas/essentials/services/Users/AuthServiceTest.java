@@ -1,9 +1,9 @@
 package com.mysaas.essentials.services.Users;
 
 import com.mysaas.essentials.config.JWTUserData;
-import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterRequest;
-import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterResponse;
-import com.mysaas.essentials.model.dto.UsersDTOS.Update.ChangePasswordRequest;
+import com.mysaas.essentials.model.dto.auth.ChangePasswordRequest;
+import com.mysaas.essentials.model.dto.user.CreateUserRequest;
+import com.mysaas.essentials.model.dto.user.UserResponse;
 import com.mysaas.essentials.model.entities.User;
 import com.mysaas.essentials.model.mappers.UserMapper;
 import com.mysaas.essentials.repository.UserRepository;
@@ -23,6 +23,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -60,8 +61,8 @@ class AuthServiceTest {
     private Authentication authentication;
 
     private User user;
-    private UserRegisterResponse response;
-    private UserRegisterRequest registerRequest;
+    private UserResponse response;
+    private CreateUserRequest registerRequest;
 
     @BeforeEach
     void setUp() {
@@ -69,8 +70,8 @@ class AuthServiceTest {
         user.setEmail("julio@email.com");
         user.setPasswordHash("hash_antigo");
 
-        response = new UserRegisterResponse("Julio", "julio@email.com", LocalDateTime.now(), true);
-        registerRequest = new UserRegisterRequest("Julio", "julio", "julio@email.com", "123456");
+        response = new UserResponse(UUID.randomUUID(), "Julio", "julio@email.com", "julio", true, false, LocalDateTime.now(), LocalDateTime.now(), null, Collections.singleton("ROLE_USER"));
+        registerRequest = new CreateUserRequest("Julio", "julio@email.com", "julio", "123456");
     }
 
 

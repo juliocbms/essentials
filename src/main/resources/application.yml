@@ -17,11 +17,12 @@ spring:
   flyway:
     enabled: true
 spring-doc:
-  paths-to-match: /users/**, /auth/**, /admin/**
+  paths-to-match: /users/**, /auth/**, /admin/**, /secret/**
   swagger-ui:
     use-root-path: true
 
 api:
   security:
+    master-key: ${SENTINEL_MASTER_KEY}
     token:
       secret: ${JWT_SECRET:my-super-secret-key-123}

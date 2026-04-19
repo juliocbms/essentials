@@ -1,9 +1,9 @@
 package com.mysaas.essentials.services.Users;
 
 import com.mysaas.essentials.config.JWTUserData;
-import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterRequest;
-import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterResponse;
-import com.mysaas.essentials.model.dto.UsersDTOS.Update.ChangePasswordRequest;
+import com.mysaas.essentials.model.dto.auth.ChangePasswordRequest;
+import com.mysaas.essentials.model.dto.user.CreateUserRequest;
+import com.mysaas.essentials.model.dto.user.UserResponse;
 import com.mysaas.essentials.model.entities.User;
 import com.mysaas.essentials.model.mappers.UserMapper;
 import com.mysaas.essentials.repository.UserRepository;
@@ -42,7 +42,7 @@ public class AuthService {
 
 
     @Transactional
-    public EntityModel<UserRegisterResponse> insertUser(UserRegisterRequest request) {
+    public EntityModel<UserResponse> insertUser(CreateUserRequest request) {
         logger.info("Starting a register for a new user.");
         userValidator.isEmailAndUsernameValidForInsert(request.email(), request.username());
 
