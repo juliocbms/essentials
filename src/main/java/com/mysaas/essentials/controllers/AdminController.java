@@ -5,6 +5,7 @@ import com.mysaas.essentials.model.dto.UsersDTOS.Register.UserRegisterResponse;
 import com.mysaas.essentials.model.dto.UsersDTOS.Update.UserUpdateRequest;
 import com.mysaas.essentials.model.dto.UsersDTOS.Update.UserUpdateRoleRequest;
 import com.mysaas.essentials.model.dto.UsersDTOS.Update.UserUpdateStatusRequest;
+import com.mysaas.essentials.model.entities.User;
 import com.mysaas.essentials.services.Users.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -13,7 +14,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -36,12 +39,14 @@ public class AdminController implements AdminControllerDocs {
     @GetMapping("/allusers")
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Page<EntityModel<UserRegisterResponse>>> getAllUsers(@RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                                               @RequestParam(value = "size", defaultValue = "12") Integer size,
-                                                                               @RequestParam(value = "direction", defaultValue = "asc") String direction) {
+    public ResponseEntity<PagedModel<EntityModel<UserRegisterResponse>>> getAllUsers(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                                                                     @RequestParam(value = "size", defaultValue = "12") Integer size,
+                                                                                     @RequestParam(value = "direction", defaultValue = "asc") String direction,
+                                                                                     PagedResourcesAssembler<User> pagedResourcesAssembler) {
         var sortDirection = "desc".equalsIgnoreCase(direction) ? Direction.DESC : Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection,"name"));
-        Page<EntityModel<UserRegisterResponse>> response = userService.getAllUsers(pageable);
+        PagedModel<EntityModel<UserRegisterResponse>> response =
+                userService.getAllUsers(pageable, pagedResourcesAssembler);
         return ResponseEntity.ok(response);
     }
 

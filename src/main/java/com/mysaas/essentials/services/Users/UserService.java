@@ -19,8 +19,10 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -43,6 +45,7 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final UserHelper userHelper;
     private final UserModelAssembler userModelAssembler;
+    PagedResourcesAssembler<UserRegisterResponse> assembler;
     private Logger logger = LoggerFactory.getLogger(UserService.class.getName());
 
     public UserService(UserRepository userRepository, UserMapper userMapper, RoleRepository roleRepository, UserValidator userValidator, RoleRepository roleRepository1, UserHelper userHelper, UserModelAssembler userModelAssembler){
@@ -56,11 +59,13 @@ public class UserService {
     }
 
 
-    public Page<EntityModel<UserRegisterResponse>> getAllUsers(Pageable pageable) {
+    public PagedModel<EntityModel<UserRegisterResponse>> getAllUsers(
+            Pageable pageable,
+            PagedResourcesAssembler<User> pagedResourcesAssembler) {
 
-        var users = userRepository.findAll(pageable);
+        Page<User> users = userRepository.findAll(pageable);
 
-        return users.map(userModelAssembler::toModel);
+        return pagedResourcesAssembler.toModel(users, userModelAssembler);
     }
 
     public EntityModel<UserRegisterResponse> getUserById(UUID id) {

@@ -78,7 +78,7 @@ class UserServiceTest {
         when(userModelAssembler.toModel(any(User.class)))
                 .thenReturn(EntityModel.of(response));
 
-        var result = userService.getAllUsers(pageable);
+        var result = userService.getAllUsers(pageable,null);
 
         assertNotNull(result);
         assertEquals(2, result.getContent().size());
