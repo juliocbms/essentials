@@ -1,6 +1,6 @@
 package com.mysaas.essentials.services.Users;
 
-import com.mysaas.essentials.controllers.AdminController;
+import com.mysaas.essentials.controllers.Users.AdminController;
 import com.mysaas.essentials.model.dto.user.UserResponse;
 import com.mysaas.essentials.model.entities.User;
 import com.mysaas.essentials.model.mappers.UserMapper;

@@ -1,36 +1,78 @@
-package com.mysaas.essentials.controllers.docs;
+package com.mysaas.essentials.controllers.docs.Secrets;
 
-import com.mysaas.essentials.model.dto.auth.ChangePasswordRequest;
-import com.mysaas.essentials.model.dto.auth.LoginRequest;
-import com.mysaas.essentials.model.dto.auth.LoginResponse;
-import com.mysaas.essentials.model.dto.user.CreateUserRequest;
+import com.mysaas.essentials.model.dto.secret.SecretResponse;
+import com.mysaas.essentials.model.dto.secret.UpdateSecretRequest;
 import com.mysaas.essentials.model.dto.user.UserResponse;
+import com.mysaas.essentials.model.entities.Secret;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
-public interface AuthControllerDocs {
+import java.util.UUID;
+
+public interface SecretAdminControllerDocs {
 
     @Operation(
-            summary = "Autenticar usuário",
-            description = "Realiza a autenticação do usuário e retorna um token de acesso."
+            summary = "Buscar secret por ID",
+            description = "Retorna os dados de uma secret com base no ID informado."
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Login realizado com sucesso",
+                    description = "Secret encontrada com sucesso",
                     content = {
                             @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = LoginResponse.class)
+                                    schema = @Schema(implementation = UserResponse.class)
+                            )
+                    }
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Requisição inválida",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Não autorizado",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Secret não encontrada",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Erro interno do servidor",
+                    content = @Content
+            )
+    })
+    ResponseEntity<EntityModel<SecretResponse>> getSecretById(@PathVariable UUID id);
+
+
+    @Operation(
+            summary = "Buscar todas as secrets",
+            description = "Pesquisa todos as secrets"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de secrets retornada com sucesso",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = UserResponse.class)
                             )
                     }
             ),
@@ -41,7 +83,12 @@ public interface AuthControllerDocs {
             ),
             @ApiResponse(
                     responseCode = "401",
-                    description = "Credenciais inválidas",
+                    description = "Não autorizado",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Secrets não encontradas",
                     content = @Content
             ),
             @ApiResponse(
@@ -50,22 +97,25 @@ public interface AuthControllerDocs {
                     content = @Content
             )
     })
-    ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request);
-
+    ResponseEntity<PagedModel<EntityModel<SecretResponse>>> getAllSecrets(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                                                          @RequestParam(value = "size", defaultValue = "12") Integer size,
+                                                                          @RequestParam(value = "direction", defaultValue = "asc") String direction,
+                                                                          @RequestParam(value = "status", required = false) Boolean status,
+                                                                          PagedResourcesAssembler<Secret> pagedResourcesAssembler);
 
 
     @Operation(
-            summary = "Cadastrar usuário",
-            description = "Realiza o cadastro de um novo usuário no sistema."
+            summary = "Atualizar secret",
+            description = "Atualiza os dados de uma secret com base no ID informado."
     )
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "201",
-                    description = "Usuário cadastrado com sucesso",
+                    responseCode = "200",
+                    description = "Secret atualizada com sucesso",
                     content = {
                             @Content(
                                     mediaType = "application/json",
-                            schema = @Schema(implementation = UserResponse.class)
+                                    schema = @Schema(implementation = UserResponse.class)
                             )
                     }
             ),
@@ -80,8 +130,8 @@ public interface AuthControllerDocs {
                     content = @Content
             ),
             @ApiResponse(
-                    responseCode = "409",
-                    description = "Usuário já existe",
+                    responseCode = "404",
+                    description = "Secret não encontrada",
                     content = @Content
             ),
             @ApiResponse(
@@ -90,25 +140,21 @@ public interface AuthControllerDocs {
                     content = @Content
             )
     })
-    ResponseEntity<EntityModel<UserResponse>> insertUser(
-            @Valid @RequestBody CreateUserRequest userRegisterRequest
-    );
-
-
+    ResponseEntity<EntityModel<SecretResponse>> updateSecretById(@PathVariable UUID id, @Valid @RequestBody UpdateSecretRequest request);
 
     @Operation(
-            summary = "Fazer Logout",
-            description = "Realiza o logout de um usuário no sistema."
+            summary = "Remover usuário",
+            description = "Remove um usuário com base no ID informado."
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "204",
-                    description = "Logout feito com sucesso",
+                    description = "Usuário removido com sucesso",
                     content = @Content
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Dados inválidos",
+                    description = "Requisição inválida",
                     content = @Content
             ),
             @ApiResponse(
@@ -117,8 +163,8 @@ public interface AuthControllerDocs {
                     content = @Content
             ),
             @ApiResponse(
-                    responseCode = "409",
-                    description = "Usuário já fez logout",
+                    responseCode = "404",
+                    description = "Usuário não encontrado",
                     content = @Content
             ),
             @ApiResponse(
@@ -127,39 +173,5 @@ public interface AuthControllerDocs {
                     content = @Content
             )
     })
-    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response);
-
-
-    @Operation(
-            summary = "Atualizar Senha",
-            description = "Realiza a atualização da senha do usuário."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "204",
-                    description = "Senha atualizada com sucesso",
-                    content = @Content
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Dados inválidos",
-                    content = @Content
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Não autorizado",
-                    content = @Content
-            ),
-            @ApiResponse(
-                    responseCode = "409",
-                    description = "Erro ao atualizar senha.",
-                    content = @Content
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "Erro interno do servidor",
-                    content = @Content
-            )
-    })
-    public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordRequest request);
+    ResponseEntity<Void> deleteSecretById(@PathVariable UUID id);
 }

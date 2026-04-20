@@ -1,10 +1,9 @@
-package com.mysaas.essentials.controllers.docs;
+package com.mysaas.essentials.controllers.docs.Users;
 
 import com.mysaas.essentials.model.dto.user.UpdateUserRequest;
 import com.mysaas.essentials.model.dto.user.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;

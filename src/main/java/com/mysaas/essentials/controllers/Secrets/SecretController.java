@@ -1,4 +1,4 @@
-package com.mysaas.essentials.controllers;
+package com.mysaas.essentials.controllers.Secrets;
 
 import com.mysaas.essentials.model.dto.secret.CreateSecretRequest;
 import com.mysaas.essentials.model.dto.secret.SecretResponse;
@@ -31,10 +31,5 @@ public class SecretController {
     }
 
 
-    @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<EntityModel<SecretResponse>> getSecretById(@PathVariable UUID id) {
-        EntityModel<SecretResponse> response = secretService.getSecretById(id);
-        return ResponseEntity.ok(response);
-    }
+
 }

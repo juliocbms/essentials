@@ -2,7 +2,6 @@ package com.mysaas.essentials.services.Users;
 
 
 
-import com.mysaas.essentials.controllers.AdminController;
 import com.mysaas.essentials.model.dto.user.UpdateUserRequest;
 import com.mysaas.essentials.model.dto.user.UpdateUserRoleRequest;
 import com.mysaas.essentials.model.dto.user.UpdateUserStatusRequest;
@@ -16,22 +15,17 @@ import com.mysaas.essentials.services.exceptions.RoleNotFoundedExcpetion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -45,7 +39,6 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final UserHelper userHelper;
     private final UserModelAssembler userModelAssembler;
-    PagedResourcesAssembler<UserResponse> assembler;
     private Logger logger = LoggerFactory.getLogger(UserService.class.getName());
 
     public UserService(UserRepository userRepository, UserMapper userMapper, RoleRepository roleRepository, UserValidator userValidator, RoleRepository roleRepository1, UserHelper userHelper, UserModelAssembler userModelAssembler){

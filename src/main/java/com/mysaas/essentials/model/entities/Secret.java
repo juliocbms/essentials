@@ -47,10 +47,13 @@ public class Secret {
     @Column(name = "secret_deleted_at",nullable = true)
     private LocalDateTime deletedAt;
 
+    @Column(name = "customer_id", nullable = false, updatable = false)
+    private UUID customerId;
+
     public Secret() {
     }
 
-    public Secret(UUID id, String secretName, String secretProvider, String secretEncryptedValue, String initializationVector, Integer keyVersion, boolean active, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
+    public Secret(UUID id, String secretName, String secretProvider, String secretEncryptedValue, String initializationVector, Integer keyVersion, boolean active, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt, UUID customerId) {
         this.id = id;
         this.secretName = secretName;
         this.secretProvider = secretProvider;
@@ -61,6 +64,7 @@ public class Secret {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.deletedAt = deletedAt;
+        this.customerId = customerId;
     }
 
 
@@ -142,6 +146,14 @@ public class Secret {
 
     public void setDeletedAt(LocalDateTime deletedAt) {
         this.deletedAt = deletedAt;
+    }
+
+    public UUID getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(UUID customerId) {
+        this.customerId = customerId;
     }
 
     @Override

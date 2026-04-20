@@ -1,7 +1,7 @@
-package com.mysaas.essentials.controllers;
+package com.mysaas.essentials.controllers.Users;
 
 import com.mysaas.essentials.config.TokenConfig;
-import com.mysaas.essentials.controllers.docs.AuthControllerDocs;
+import com.mysaas.essentials.controllers.docs.Users.AuthControllerDocs;
 import com.mysaas.essentials.model.dto.auth.ChangePasswordRequest;
 import com.mysaas.essentials.model.dto.auth.LoginRequest;
 import com.mysaas.essentials.model.dto.auth.LoginResponse;

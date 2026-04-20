@@ -1,6 +1,6 @@
-package com.mysaas.essentials.controllers;
+package com.mysaas.essentials.controllers.Users;
 
-import com.mysaas.essentials.controllers.docs.UserControllerDocs;
+import com.mysaas.essentials.controllers.docs.Users.UserControllerDocs;
 import com.mysaas.essentials.model.dto.user.UpdateUserRequest;
 import com.mysaas.essentials.model.dto.user.UserResponse;
 import com.mysaas.essentials.services.Users.UserService;

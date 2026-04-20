@@ -1,4 +1,4 @@
-package com.mysaas.essentials.controllers.docs;
+package com.mysaas.essentials.controllers.docs.Users;
 
 import com.mysaas.essentials.model.dto.user.UpdateUserRequest;
 import com.mysaas.essentials.model.dto.user.UpdateUserRoleRequest;
@@ -11,9 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;

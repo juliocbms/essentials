@@ -1,6 +1,6 @@
-package com.mysaas.essentials.controllers;
+package com.mysaas.essentials.controllers.Users;
 
-import com.mysaas.essentials.controllers.docs.AdminControllerDocs;
+import com.mysaas.essentials.controllers.docs.Users.AdminControllerDocs;
 import com.mysaas.essentials.model.dto.user.UpdateUserRequest;
 import com.mysaas.essentials.model.dto.user.UpdateUserRoleRequest;
 import com.mysaas.essentials.model.dto.user.UpdateUserStatusRequest;
@@ -9,7 +9,6 @@ import com.mysaas.essentials.model.entities.User;
 import com.mysaas.essentials.services.Users.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;

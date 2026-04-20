@@ -2,9 +2,9 @@ spring:
   application:
     name: essentials
   datasource:
-    url: jdbc:postgresql://localhost:5432/essentials
-    username: postgres
-    password: root
+    url: ${URL_BANCO_DADOS}
+    username: ${USER_BANCO_DADOS}
+    password: ${USER_PASSWORD_BANCO_DADOS}
     driver-class-name: org.postgresql.Driver
   jpa:
     generate-ddl: true
@@ -17,7 +17,7 @@ spring:
   flyway:
     enabled: true
 spring-doc:
-  paths-to-match: /users/**, /auth/**, /admin/**, /secret/**
+  paths-to-match: /users/**, /auth/**, /admin/**, /secret/**, /manage/secret/**
   swagger-ui:
     use-root-path: true
 
