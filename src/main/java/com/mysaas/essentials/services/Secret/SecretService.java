@@ -103,7 +103,7 @@ public class SecretService {
 
                 updatedSecret.setSecretEncryptedValue(encryptedData.value());
                 updatedSecret.setInitializationVector(encryptedData.iv());
-                updatedSecret.setKeyVersion(1);
+                updatedSecret.setKeyVersion();
             }
             Secret savedSecret = secretRepository.save(updatedSecret);
             return secretModelAssembler.toModel(savedSecret);
