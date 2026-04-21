@@ -80,10 +80,16 @@ public class SecretService {
 
     public PagedModel<EntityModel<SecretResponse>> getAllSecrets(
             Pageable pageable,
-            PagedResourcesAssembler<Secret> pagedResourcesAssembler){
-        UUID currentCustomerId = secretHelper.getAuthenticatedUserEntity().getId();
+            PagedResourcesAssembler<Secret> pagedResourcesAssembler) {
 
-        Page<Secret> secrets = secretRepository.findAllByCustomerIdAndActiveTrue(currentCustomerId, pageable);
+        Page<Secret> secrets;
+
+        if (secretHelper.isCurrentUserAdmin()) {
+            secrets = secretRepository.findAll(pageable);
+        } else {
+            UUID currentCustomerId = secretHelper.getAuthenticatedUserEntity().getId();
+            secrets = secretRepository.findAllByCustomerIdAndActiveTrue(currentCustomerId, pageable);
+        }
 
         return pagedResourcesAssembler.toModel(secrets, secretModelAssembler);
     }
@@ -91,28 +97,24 @@ public class SecretService {
     @Transactional
     public EntityModel<SecretResponse> updateSecret(UpdateSecretRequest request, UUID id) {
         Secret updatedSecret = secretHelper.findEntityOrThrow(id);
+
         secretHelper.validateOwnership(updatedSecret);
 
         try {
             secretMapper.updatetoEntity(request, updatedSecret);
 
             if (request.secretValue() != null && !request.secretValue().isBlank()) {
-                logger.info("Atualizando valor sensível para a secret: {}", id);
-
                 var encryptedData = encryptionService.encrypt(request.secretValue());
-
                 updatedSecret.setSecretEncryptedValue(encryptedData.value());
                 updatedSecret.setInitializationVector(encryptedData.iv());
-                updatedSecret.setKeyVersion();
+                updatedSecret.setKeyVersion(updatedSecret.getKeyVersion() + 1);
             }
-            Secret savedSecret = secretRepository.save(updatedSecret);
-            return secretModelAssembler.toModel(savedSecret);
+
+            return secretModelAssembler.toModel(secretRepository.save(updatedSecret));
 
         } catch (DataIntegrityViolationException e) {
-            logger.error("Erro de integridade ao atualizar secret {}: {}", id, e.getMessage());
             throw new RuntimeException("Já existe um segredo com este nome.");
         } catch (Exception e) {
-            logger.error("Erro crítico na criptografia durante update: {}", e.getMessage());
             throw new RuntimeException("Falha ao proteger novo segredo.");
         }
     }
@@ -122,12 +124,8 @@ public class SecretService {
     public void deleteSecret(UUID id){
         Secret secret = secretHelper.findEntityOrThrow(id);
         secretHelper.validateOwnership(secret);
-        try {
-            secretRepository.delete(secret);
-        } catch (IllegalArgumentException | DataIntegrityViolationException e) {
-            logger.error("Error: {}", e.getMessage());
-            throw e;
-        }
+
+        secretRepository.delete(secret);
     }
 
 

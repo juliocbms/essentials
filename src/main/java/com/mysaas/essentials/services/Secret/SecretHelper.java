@@ -1,19 +1,16 @@
 package com.mysaas.essentials.services.Secret;
 
 import com.mysaas.essentials.config.JWTUserData;
-import com.mysaas.essentials.model.entities.Role;
 import com.mysaas.essentials.model.entities.Secret;
 import com.mysaas.essentials.model.entities.User;
 import com.mysaas.essentials.repository.SecretRepository;
 import com.mysaas.essentials.repository.UserRepository;
 import com.mysaas.essentials.services.Users.UserService;
 import com.mysaas.essentials.services.exceptions.ResourceNotFoundException;
-import com.mysaas.essentials.services.exceptions.UserNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -24,7 +21,7 @@ import java.util.UUID;
     private final UserRepository userRepository;
     private final SecretRepository secretRepository;
 
-    private Logger logger = LoggerFactory.getLogger(UserService.class.getName());
+    private Logger logger = LoggerFactory.getLogger(SecretHelper.class.getName());
 
     public SecretHelper(UserRepository userRepository, SecretRepository secretRepository) {
         this.userRepository = userRepository;
@@ -39,7 +36,17 @@ import java.util.UUID;
                 .orElseThrow(() -> new ResourceNotFoundException(id));
     }
 
+    boolean isCurrentUserAdmin() {
+        return SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+                .stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+    }
+
     void validateOwnership(Secret secret) {
+        if (isCurrentUserAdmin()) {
+            logger.info("Acesso administrativo concedido para o recurso: {}", secret.getId());
+            return;
+        }
 
         UUID currentUserId = getAuthenticatedUserEntity().getId();
         if (!secret.getCustomerId().equals(currentUserId)) {

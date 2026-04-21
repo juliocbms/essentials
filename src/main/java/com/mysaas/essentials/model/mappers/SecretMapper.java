@@ -22,10 +22,8 @@ public interface SecretMapper {
 
 
     @BeanMapping(ignoreByDefault = true)
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "secretEncryptedValue", ignore = true)
-    @Mapping(target = "initializationVector", ignore = true)
-    @Mapping(target = "keyVersion", ignore = true)
+    @Mapping(target = "secretName", source = "secretName")
+    @Mapping(target = "secretProvider", source = "secretProvider")
     Secret updatetoEntity(UpdateSecretRequest request, @MappingTarget Secret entity);
 
 

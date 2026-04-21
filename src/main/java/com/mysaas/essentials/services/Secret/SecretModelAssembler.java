@@ -1,8 +1,6 @@
 package com.mysaas.essentials.services.Secret;
 
-import com.mysaas.essentials.controllers.Secrets.SecretAdminController;
 import com.mysaas.essentials.controllers.Secrets.SecretController;
-import com.mysaas.essentials.controllers.Users.AdminController;
 import com.mysaas.essentials.model.dto.secret.SecretResponse;
 import com.mysaas.essentials.model.entities.Secret;
 import com.mysaas.essentials.model.mappers.SecretMapper;
@@ -28,19 +26,19 @@ public class SecretModelAssembler implements RepresentationModelAssembler<Secret
        SecretResponse dto = secretMapper.toResponse(entity);
 
        return EntityModel.of(dto,
-               linkTo(methodOn(SecretAdminController.class).getSecretById(entity.getId()))
+                linkTo(methodOn(SecretController.class).getMySecretById(entity.getId()))
                        .withSelfRel()
                        .withType("GET"),
 
-               linkTo(methodOn(SecretAdminController.class).getAllSecrets(0,12,"asc",null,null))
-                       .withRel("all-users")
+               linkTo(methodOn(SecretController.class).getMySecrets(0,12,"asc",null,null))
+                       .withRel("my-secrets")
                        .withType("GET"),
 
-               linkTo(methodOn(SecretAdminController.class).updateSecretById(entity.getId(), null))
+               linkTo(methodOn(SecretController.class).updateMySecretById(entity.getId(), null))
                        .withRel("update")
                        .withType("PUT"),
 
-               linkTo(methodOn(SecretAdminController.class).deleteSecretById(entity.getId()))
+               linkTo(methodOn(SecretController.class).deleteMySecretById(entity.getId()))
                        .withRel("delete")
                        .withType("DELETE"));
 
