@@ -18,6 +18,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -118,12 +119,35 @@ public class SecretService {
         }
     }
 
+    @Transactional
+    public EntityModel<SecretResponse> restoreSecret(UUID id) {
+        Secret secret = secretHelper.findEntityOrThrow(id);
+
+        secretHelper.validateOwnership(secret);
+
+        if (secret.isActive()) {
+            throw new RuntimeException("Este segredo já está ativo.");
+        }
+        secret.setActive(true);
+        secret.setDeletedAt(null);
+        logger.info("Secret {} foi restaurada com sucesso.", id);
+        return secretModelAssembler.toModel(secretRepository.save(secret));
+    }
+
+
+    @Transactional
+    public EntityModel<SecretResponse> desactiveSecret(UUID id){
+        Secret secret = secretHelper.findEntityOrThrow(id);
+        secretHelper.validateOwnership(secret);
+        secret.setActive(false);
+        secret.setDeletedAt(LocalDateTime.now());
+        return secretModelAssembler.toModel(secret);
+    }
 
     @Transactional
     public void deleteSecret(UUID id){
         Secret secret = secretHelper.findEntityOrThrow(id);
         secretHelper.validateOwnership(secret);
-
         secretRepository.delete(secret);
     }
 

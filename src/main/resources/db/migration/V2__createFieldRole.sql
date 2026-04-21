@@ -12,5 +12,5 @@ CREATE TABLE tb_users_roles (
     CONSTRAINT fk_role FOREIGN KEY (role_id) REFERENCES tb_role(id) ON DELETE CASCADE
 );
 
-INSERT INTO tb_role (id, name) VALUES (gen_random_uuid(), 'ROLE_USER');
-INSERT INTO tb_role (id, name) VALUES (gen_random_uuid(), 'ROLE_ADMIN');
+INSERT INTO tb_role (id, name) VALUES (gen_random_uuid(), 'USER');
+INSERT INTO tb_role (id, name) VALUES (gen_random_uuid(), 'ADMIN');

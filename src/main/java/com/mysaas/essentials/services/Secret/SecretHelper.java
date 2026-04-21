@@ -39,7 +39,7 @@ import java.util.UUID;
     boolean isCurrentUserAdmin() {
         return SecurityContextHolder.getContext().getAuthentication().getAuthorities()
                 .stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(auth -> auth.getAuthority().equals("ADMIN"));
     }
 
     void validateOwnership(Secret secret) {

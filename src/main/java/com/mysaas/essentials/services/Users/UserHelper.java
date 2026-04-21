@@ -35,7 +35,7 @@ class UserHelper {
     }
 
      Role findDefaultRole() {
-        return roleRepository.findByName("ROLE_USER")
+        return roleRepository.findByName("USER")
                 .orElseThrow(() -> new RuntimeException("Default role not found"));
     }
 

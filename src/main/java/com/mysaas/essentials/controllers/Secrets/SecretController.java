@@ -67,11 +67,18 @@ public class SecretController implements SecretControllerDocs {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/me/{id}")
+    @PatchMapping("/me/disable/{id}")
     @Override
-    public ResponseEntity<Void> deleteMySecretById(@PathVariable UUID id){
-        secretService.deleteSecret(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<EntityModel<SecretResponse>> deactivateMySecretById(@PathVariable UUID id){
+        EntityModel<SecretResponse> response = secretService.desactiveSecret(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/me/active/{id}")
+    @Override
+    public ResponseEntity<EntityModel<SecretResponse>> activateMySecretById(@PathVariable UUID id){
+        EntityModel<SecretResponse> response = secretService.restoreSecret(id);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/admin/allSecrets")
@@ -105,6 +112,22 @@ public class SecretController implements SecretControllerDocs {
         return ResponseEntity.ok(response);
     }
 
+    @PatchMapping("/admin/disable/{id}")
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<EntityModel<SecretResponse>> deactivateSecretById(@PathVariable UUID id){
+        EntityModel<SecretResponse> response = secretService.desactiveSecret(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/admin/active/{id}")
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<EntityModel<SecretResponse>> activeSecretById(@PathVariable UUID id){
+        EntityModel<SecretResponse> response = secretService.restoreSecret(id);
+        return ResponseEntity.ok(response);
+    }
+
     @DeleteMapping("/admin/{id}")
     @Override
     @PreAuthorize("hasRole('ADMIN')")
@@ -112,7 +135,4 @@ public class SecretController implements SecretControllerDocs {
         secretService.deleteSecret(id);
         return ResponseEntity.noContent().build();
     }
-
-
-
 }

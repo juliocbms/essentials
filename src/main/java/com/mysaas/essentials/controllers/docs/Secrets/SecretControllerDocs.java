@@ -173,14 +173,16 @@ public interface SecretControllerDocs {
     })
     ResponseEntity<EntityModel<SecretResponse>> updateMySecretById(@PathVariable UUID id, @Valid @RequestBody UpdateSecretRequest request);
 
+
+
     @Operation(
-            summary = "Remover minha secret",
-            description = "Remove uma secret do usuário autenticado com base no ID informado."
+            summary = "Inativa minha secret",
+            description = "Inativa uma secret do usuário autenticado com base no ID informado."
     )
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "204",
-                    description = "Secret removida com sucesso",
+                    responseCode = "200",
+                    description = "Secret inativada com sucesso",
                     content = @Content
             ),
             @ApiResponse(
@@ -204,7 +206,110 @@ public interface SecretControllerDocs {
                     content = @Content
             )
     })
-    ResponseEntity<Void> deleteMySecretById(@PathVariable UUID id);
+    public ResponseEntity<EntityModel<SecretResponse>> deactivateMySecretById(@PathVariable UUID id);
+
+
+    @Operation(
+            summary = "Inativa minha secret",
+            description = "Inativa uma secret do usuário autenticado com base no ID informado."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Secret inativada com sucesso",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Requisição inválida",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Não autorizado",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Secret não encontrada",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Erro interno do servidor",
+                    content = @Content
+            )
+    })
+    public ResponseEntity<EntityModel<SecretResponse>> deactivateSecretById(@PathVariable UUID id);
+
+
+
+    @Operation(
+            summary = "Ativa minha secret",
+            description = "Ativa uma secret do usuário autenticado com base no ID informado."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Secret Ativa com sucesso",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Requisição inválida",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Não autorizado",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Secret não encontrada",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Erro interno do servidor",
+                    content = @Content
+            )
+    })
+    public ResponseEntity<EntityModel<SecretResponse>> activateMySecretById(@PathVariable UUID id);
+
+
+    @Operation(
+            summary = "Ativa minha secret",
+            description = "Ativa uma secret do usuário autenticado com base no ID informado."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Secret Ativa com sucesso",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Requisição inválida",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Não autorizado",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Secret não encontrada",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Erro interno do servidor",
+                    content = @Content
+            )
+    })
+    public ResponseEntity<EntityModel<SecretResponse>> activeSecretById(@PathVariable UUID id);
 
     @Operation(
             summary = "Listar todas as secrets",
