@@ -6,7 +6,6 @@ import com.mysaas.essentials.model.dto.secret.UpdateSecretRequest;
 import com.mysaas.essentials.model.entities.Secret;
 import com.mysaas.essentials.model.mappers.SecretMapper;
 import com.mysaas.essentials.repository.SecretRepository;
-import com.mysaas.essentials.services.Users.UserService;
 
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -29,7 +28,7 @@ public class SecretService {
     private final SecretMapper secretMapper;
     private final SecretModelAssembler secretModelAssembler;
     private final SecretHelper secretHelper;
-    private Logger logger = LoggerFactory.getLogger(SecretService.class.getName());
+    private final Logger logger = LoggerFactory.getLogger(SecretService.class.getName());
 
     public SecretService(SecretRepository secretRepository, EncryptionService encryptionService, SecretMapper secretMapper, SecretModelAssembler secretModelAssembler, SecretHelper secretHelper) {
         this.secretRepository = secretRepository;
