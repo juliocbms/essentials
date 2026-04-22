@@ -24,4 +24,6 @@ public interface MasterKeyRepository extends JpaRepository<MasterKey, UUID> {
 
     @Query("SELECT COUNT(s) > 0 FROM Secret s WHERE s.keyVersion = :version")
     boolean hasSecretsWithVersion(@Param("version") Integer version);
+
+    boolean existsByVersion(Integer version);
 }

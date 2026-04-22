@@ -4,11 +4,13 @@ import com.mysaas.essentials.model.entities.KeyStatus;
 import com.mysaas.essentials.model.entities.MasterKey;
 import com.mysaas.essentials.model.entities.VaultRefreshEvent;
 import com.mysaas.essentials.repository.MasterKeyRepository;
+import com.mysaas.essentials.services.exceptions.MasterKeyVersionAlreadyExistsException;
 import com.mysaas.essentials.services.exceptions.SecretEncryptionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +42,10 @@ public class MasterKeyService {
 
     @Transactional
     public void generateAndEncryptNewMasterKey(Integer version) {
+        if (masterKeyrepository.existsByVersion(version)) {
+            throw new MasterKeyVersionAlreadyExistsException(version);
+        }
+
         try {
             masterKeyrepository.demoteCurrentKeys();
             byte[] rawKey = new byte[32];
@@ -65,6 +71,8 @@ public class MasterKeyService {
             masterKeyrepository.save(mk);
             eventPublisher.publishEvent(new VaultRefreshEvent(this));
             logger.info("Nova chave V{} promovida a CURRENT. Versoes anteriores agora sao DEPRECATED.", version);
+        } catch (DataIntegrityViolationException e) {
+            throw new MasterKeyVersionAlreadyExistsException(version);
         } catch (GeneralSecurityException | IllegalArgumentException e) {
             throw new SecretEncryptionException("Falha ao gerar e criptografar nova master key.", e);
         }

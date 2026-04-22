@@ -1,7 +1,5 @@
 package com.mysaas.essentials.services.Users;
 
-
-
 import com.mysaas.essentials.model.dto.user.UpdateUserRequest;
 import com.mysaas.essentials.model.dto.user.UpdateUserRoleRequest;
 import com.mysaas.essentials.model.dto.user.UpdateUserStatusRequest;
@@ -21,7 +19,6 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.stereotype.Service;
-
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
@@ -50,13 +47,11 @@ public class UserService {
         this.userModelAssembler = userModelAssembler;
     }
 
-
     public PagedModel<EntityModel<UserResponse>> getAllUsers(
             Pageable pageable,
             PagedResourcesAssembler<User> pagedResourcesAssembler) {
 
         Page<User> users = userRepository.findAll(pageable);
-
         return pagedResourcesAssembler.toModel(users, userModelAssembler);
     }
 
@@ -65,8 +60,7 @@ public class UserService {
             Pageable pageable,
             PagedResourcesAssembler<User> pagedResourcesAssembler) {
 
-        Page<User> users = userRepository.findUsersByName(name,pageable);
-
+        Page<User> users = userRepository.findUsersByName(name, pageable);
         return pagedResourcesAssembler.toModel(users, userModelAssembler);
     }
 
@@ -75,7 +69,6 @@ public class UserService {
         return userModelAssembler.toModel(user);
     }
 
-
     @Transactional
     public EntityModel<UserResponse> updateUser(UpdateUserRequest request, UUID id) {
         User updatedUser = userHelper.findEntityOrThrow(id);
@@ -83,12 +76,10 @@ public class UserService {
 
         try {
             userMapper.updateToEntity(request, updatedUser);
-
             User savedUser = userRepository.save(updatedUser);
             logger.info("User with id: {} updated!", id);
 
             return userModelAssembler.toModel(savedUser);
-
         } catch (IllegalArgumentException | DataIntegrityViolationException e) {
             logger.error("Error: {}", e.getMessage());
             throw e;
@@ -132,13 +123,25 @@ public class UserService {
     public EntityModel<UserResponse> updateRoleByUser(UpdateUserRoleRequest request, UUID id){
         User user = userHelper.findEntityOrThrow(id);
         try {
-            Set<Role> rolesFromDb = request.roles().stream()
-                    .map(roleName -> roleRepository.findByName(roleName)
-                            .orElseThrow(() -> new RoleNotFoundedExcpetion("Role não encontrada: " + roleName)))
+            Set<String> requestedRoles = request.roles();
+            Set<Role> rolesFromDb = roleRepository.findByNameIn(requestedRoles).stream()
                     .collect(Collectors.toSet());
+
+            Set<String> foundRoleNames = rolesFromDb.stream()
+                    .map(Role::getName)
+                    .collect(Collectors.toSet());
+
+            Set<String> missingRoles = requestedRoles.stream()
+                    .filter(roleName -> !foundRoleNames.contains(roleName))
+                    .collect(Collectors.toSet());
+
+            if (!missingRoles.isEmpty()) {
+                throw new RoleNotFoundedExcpetion("Role nao encontrada: " + missingRoles.iterator().next());
+            }
+
             user.setRoles(rolesFromDb);
             userRepository.save(user);
-            logger.info("Roles do usuário {} atualizadas com sucesso!", id);
+            logger.info("Roles do usuario {} atualizadas com sucesso!", id);
 
             return userModelAssembler.toModel(user);
         }
@@ -149,12 +152,12 @@ public class UserService {
     }
 
     public EntityModel<UserResponse> updateStatusByUser(UpdateUserStatusRequest request, UUID id){
-        User user    = userHelper.findEntityOrThrow(id);
+        User user = userHelper.findEntityOrThrow(id);
         try {
             user.setActive(request.active());
             userRepository.save(user);
             return userModelAssembler.toModel(user);
-        }catch (IllegalArgumentException | DataIntegrityViolationException e) {
+        } catch (IllegalArgumentException | DataIntegrityViolationException e) {
             logger.error("Error: {}", e.getMessage());
             throw e;
         }

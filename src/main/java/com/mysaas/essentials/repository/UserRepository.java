@@ -1,6 +1,7 @@
 package com.mysaas.essentials.repository;
 
 import com.mysaas.essentials.model.entities.User;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,7 +22,12 @@ public interface UserRepository  extends JpaRepository<User, UUID> {
 
 
 
+    @Override
+    @EntityGraph(attributePaths = "roles")
+    Page<User> findAll(Pageable pageable);
+
     @Query("SELECT u FROM User u WHERE LOWER(u.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    @EntityGraph(attributePaths = "roles")
     Page<User> findUsersByName(@Param("name")String name, Pageable pageable);
 
     boolean existsByEmail(String email);

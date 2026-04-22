@@ -2,6 +2,7 @@ package com.mysaas.essentials.controllers.exceptions;
 
 import com.mysaas.essentials.services.exceptions.*;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -10,6 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.Instant;
 
@@ -119,6 +121,35 @@ public class ResourceExceptionHandler {
     @ExceptionHandler(SecretEncryptionException.class)
     public ResponseEntity<StandardError> secretEncryption(SecretEncryptionException e, HttpServletRequest request){
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Encryption Error", e.getMessage(), request);
+    }
+
+    @ExceptionHandler(MasterKeyVersionAlreadyExistsException.class)
+    public ResponseEntity<StandardError> masterKeyVersionAlreadyExists(MasterKeyVersionAlreadyExistsException e, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "Master Key Version Already Exists", e.getMessage(), request);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<StandardError> methodArgumentTypeMismatch(MethodArgumentTypeMismatchException e, HttpServletRequest request) {
+        String parameter = e.getName();
+        String expectedType = e.getRequiredType() != null ? e.getRequiredType().getSimpleName() : "expected type";
+        String message = "Invalid value for parameter '" + parameter + "'. Expected: " + expectedType + ".";
+        return buildResponse(HttpStatus.BAD_REQUEST, "Invalid Request Parameter", message, request);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<StandardError> dataIntegrityViolation(DataIntegrityViolationException e, HttpServletRequest request) {
+        String detail = e.getMostSpecificCause() != null ? e.getMostSpecificCause().getMessage() : e.getMessage();
+
+        if (detail != null && detail.contains("tb_master_keys_version_key")) {
+            return buildResponse(
+                    HttpStatus.CONFLICT,
+                    "Master Key Version Already Exists",
+                    "Master key version already exists.",
+                    request
+            );
+        }
+
+        return buildResponse(HttpStatus.CONFLICT, "Database Constraint Violation", "Operation violates database constraints.", request);
     }
 
 }
