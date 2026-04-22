@@ -23,7 +23,7 @@ public class SecurityAdminController {
     }
 
     @PostMapping("/master-keys/generate")
-    public ResponseEntity<String> generateNewKey(@RequestParam Integer version) throws Exception {
+    public ResponseEntity<String> generateNewKey(@RequestParam Integer version) {
         masterKeyService.generateAndEncryptNewMasterKey(version);
         return ResponseEntity.ok("Nova Master Key V" + version + " gerada e salva no banco!");
     }

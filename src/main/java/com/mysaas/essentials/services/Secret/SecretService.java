@@ -9,7 +9,10 @@ import com.mysaas.essentials.model.entities.SecretHistory;
 import com.mysaas.essentials.model.mappers.SecretMapper;
 import com.mysaas.essentials.repository.SecretHistoryRepository;
 import com.mysaas.essentials.repository.SecretRepository;
-
+import com.mysaas.essentials.services.exceptions.ResourceNotFoundException;
+import com.mysaas.essentials.services.exceptions.SecretAlreadyActiveException;
+import com.mysaas.essentials.services.exceptions.SecretAlreadyExistsException;
+import com.mysaas.essentials.services.exceptions.SecretEncryptionException;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +26,6 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-
 import java.util.UUID;
 
 @Service
@@ -63,17 +65,15 @@ public class SecretService {
             return secretModelAssembler.toModel(secretRepository.save(secret));
         } catch (DataIntegrityViolationException ex) {
             logger.error("Erro de integridade ao salvar segredo: {}", ex.getMessage());
-            throw new RuntimeException("Já existe um segredo com este nome para este usuário.");
+            throw new SecretAlreadyExistsException("Ja existe um segredo com este nome para este usuario.");
         }
     }
 
     @Transactional
     public EntityModel<SecretResponse> updateSecret(UpdateSecretRequest request, UUID id) {
-        Secret secret = secretHelper.findEntityOrThrow(id);
-        secretHelper.validateOwnership(secret);
+        Secret secret = getOwnedSecret(id);
 
         saveHistory(secret);
-
         secretMapper.updatetoEntity(request, secret);
 
         if (request.secretValue() != null && !request.secretValue().isBlank()) {
@@ -83,7 +83,7 @@ public class SecretService {
         try {
             return secretModelAssembler.toModel(secretRepository.save(secret));
         } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException("Nome de segredo já em uso.");
+            throw new SecretAlreadyExistsException("Nome de segredo ja em uso.");
         }
     }
 
@@ -107,7 +107,6 @@ public class SecretService {
                 );
 
                 encryptAndSetFields(secret, plainText);
-
                 secretRepository.save(secret);
             } catch (Exception e) {
                 logger.error("Falha ao rotacionar segredo individual {}: {}", secret.getId(), e.getMessage());
@@ -125,9 +124,9 @@ public class SecretService {
             secret.setSecretEncryptedValue(encryptedData.value());
             secret.setInitializationVector(encryptedData.iv());
             secret.setKeyVersion(encryptedData.currentVersion());
-        } catch (Exception e) {
-            logger.error("Erro crítico na criptografia: {}", e.getMessage());
-            throw new RuntimeException("Falha ao proteger dados sensíveis.");
+        } catch (SecretEncryptionException e) {
+            logger.error("Erro critico na criptografia: {}", e.getMessage());
+            throw e;
         }
     }
 
@@ -139,14 +138,11 @@ public class SecretService {
         history.setKeyVersion(secret.getKeyVersion());
         history.setArchivedAt(LocalDateTime.now());
         secretHistoryRepository.save(history);
-        logger.debug("Histórico de auditoria criado para o segredo: {}", secret.getId());
+        logger.debug("Historico de auditoria criado para o segredo: {}", secret.getId());
     }
 
-
     public EntityModel<SecretResponse> getSecretById(UUID id) {
-        Secret secret = secretHelper.findEntityOrThrow(id);
-        secretHelper.validateOwnership(secret);
-        return secretModelAssembler.toModel(secret);
+        return secretModelAssembler.toModel(getOwnedSecret(id));
     }
 
     public PagedModel<EntityModel<SecretResponse>> getAllSecrets(
@@ -162,10 +158,11 @@ public class SecretService {
 
     @Transactional
     public EntityModel<SecretResponse> restoreSecret(UUID id) {
-        Secret secret = secretHelper.findEntityOrThrow(id);
-        secretHelper.validateOwnership(secret);
+        Secret secret = getOwnedSecret(id);
 
-        if (secret.isActive()) throw new RuntimeException("Este segredo já está ativo.");
+        if (secret.isActive()) {
+            throw new SecretAlreadyActiveException("Este segredo ja esta ativo.");
+        }
 
         secret.setActive(true);
         secret.setDeletedAt(null);
@@ -174,8 +171,7 @@ public class SecretService {
 
     @Transactional
     public EntityModel<SecretResponse> desactiveSecret(UUID id) {
-        Secret secret = secretHelper.findEntityOrThrow(id);
-        secretHelper.validateOwnership(secret);
+        Secret secret = getOwnedSecret(id);
         secret.setActive(false);
         secret.setDeletedAt(LocalDateTime.now());
         return secretModelAssembler.toModel(secretRepository.save(secret));
@@ -183,14 +179,13 @@ public class SecretService {
 
     @Transactional
     public void deleteSecret(UUID id) {
-        Secret secret = secretHelper.findEntityOrThrow(id);
-        secretHelper.validateOwnership(secret);
+        Secret secret = getOwnedSecret(id);
         secretRepository.delete(secret);
     }
 
-    public String getDecryptedValue(String name) throws Exception {
+    public String getDecryptedValue(String name) {
         Secret secret = secretRepository.findBySecretName(name)
-                .orElseThrow(() -> new RuntimeException("Segredo não encontrado!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Segredo nao encontrado."));
         secretHelper.validateOwnership(secret);
 
         return encryptionService.decrypt(
@@ -198,5 +193,11 @@ public class SecretService {
                 secret.getInitializationVector(),
                 secret.getKeyVersion()
         );
+    }
+
+    private Secret getOwnedSecret(UUID id) {
+        Secret secret = secretHelper.findEntityOrThrow(id);
+        secretHelper.validateOwnership(secret);
+        return secret;
     }
 }

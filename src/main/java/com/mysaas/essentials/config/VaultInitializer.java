@@ -19,7 +19,7 @@ public class VaultInitializer implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         if (repository.count() == 0) {
             System.out.println("SISTEMA: Banco de chaves vazio. Gerando Master Key V1...");
 

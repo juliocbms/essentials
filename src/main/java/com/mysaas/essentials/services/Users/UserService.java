@@ -20,8 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -39,14 +37,15 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final UserHelper userHelper;
     private final UserModelAssembler userModelAssembler;
-    private Logger logger = LoggerFactory.getLogger(UserService.class.getName());
+    private final Logger logger = LoggerFactory.getLogger(UserService.class.getName());
 
-    public UserService(UserRepository userRepository, UserMapper userMapper, RoleRepository roleRepository, UserValidator userValidator, RoleRepository roleRepository1, UserHelper userHelper, UserModelAssembler userModelAssembler){
+    public UserService(UserRepository userRepository, UserMapper userMapper, UserValidator userValidator,
+                       RoleRepository roleRepository, UserHelper userHelper, UserModelAssembler userModelAssembler){
 
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.userValidator = userValidator;
-        this.roleRepository = roleRepository1;
+        this.roleRepository = roleRepository;
         this.userHelper = userHelper;
         this.userModelAssembler = userModelAssembler;
     }
@@ -116,9 +115,7 @@ public class UserService {
 
     @Transactional
     public EntityModel<UserResponse> updateAuthenticatedUser(UpdateUserRequest request) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException(email));
+        User user = userHelper.getAuthenticatedUserEntity();
         userValidator.isUsernameValidForUpdate(request.username(), user.getId());
 
         try {

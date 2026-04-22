@@ -4,7 +4,7 @@ import com.mysaas.essentials.model.entities.MasterKey;
 import com.mysaas.essentials.model.entities.VaultRefreshEvent;
 import com.mysaas.essentials.repository.MasterKeyRepository;
 import com.mysaas.essentials.services.Secret.MasterKeyService;
-import com.mysaas.essentials.services.Secret.SecretService;
+import com.mysaas.essentials.services.exceptions.VaultKeyNotFoundException;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +42,6 @@ public class VaultConfig {
         refreshKeys();
     }
 
-
     @EventListener(VaultRefreshEvent.class)
     @PostConstruct
     public synchronized void refreshKeys() {
@@ -61,15 +60,14 @@ public class VaultConfig {
                 logger.error("Erro ao carregar chave V{}: {}", mk.getVersion(), e.getMessage());
             }
         }
-        logger.info("Cofre atualizado. Versão ativa (Escrita): V{}. Total de chaves em cache (Leitura): {}",
+        logger.info("Cofre atualizado. Versao ativa (Escrita): V{}. Total de chaves em cache (Leitura): {}",
                 activeVersion, masterKeys.size());
     }
-
 
     public String getKey(Integer version) {
         String key = masterKeys.get(version);
         if (key == null) {
-            throw new RuntimeException("Chave mestra não encontrada para a versão: " + version);
+            throw new VaultKeyNotFoundException(version);
         }
         return key;
     }

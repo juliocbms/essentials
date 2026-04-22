@@ -6,6 +6,7 @@ import com.mysaas.essentials.model.entities.User;
 import com.mysaas.essentials.repository.RoleRepository;
 import com.mysaas.essentials.repository.UserRepository;
 import com.mysaas.essentials.services.exceptions.ResourceNotFoundException;
+import com.mysaas.essentials.services.exceptions.RoleNotFoundedExcpetion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,7 +37,7 @@ class UserHelper {
 
      Role findDefaultRole() {
         return roleRepository.findByName("USER")
-                .orElseThrow(() -> new RuntimeException("Default role not found"));
+                .orElseThrow(() -> new RoleNotFoundedExcpetion("Default role not found"));
     }
 
      void addDefaultRole(User user) {

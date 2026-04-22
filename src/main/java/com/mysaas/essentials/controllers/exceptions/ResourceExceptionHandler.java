@@ -16,68 +16,55 @@ import java.time.Instant;
 @ControllerAdvice
 public class ResourceExceptionHandler {
 
+    private ResponseEntity<StandardError> buildResponse(HttpStatus status, String error, String message, HttpServletRequest request) {
+        StandardError err = new StandardError(
+                Instant.now(),
+                status.value(),
+                error,
+                message,
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(status).body(err);
+    }
+
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<StandardError> emailAlreadyExists(EmailAlreadyExistsException e, HttpServletRequest request){
-        String error = "Email Already Exists";
-        HttpStatus status =HttpStatus.CONFLICT;
-        StandardError err = new StandardError(Instant.now(),status.value(),error,e.getMessage(),request.getRequestURI());
-        return ResponseEntity.status(status).body(err);
+        return buildResponse(HttpStatus.CONFLICT, "Email Already Exists", e.getMessage(), request);
     }
 
     @ExceptionHandler(UsernameAlreadyExistsException.class)
     public ResponseEntity<StandardError> emailAlreadyExists(UsernameAlreadyExistsException e, HttpServletRequest request){
-        String error = "Username Already Exists";
-        HttpStatus status =HttpStatus.CONFLICT;
-        StandardError err = new StandardError(Instant.now(),status.value(),error,e.getMessage(),request.getRequestURI());
-        return ResponseEntity.status(status).body(err);
+        return buildResponse(HttpStatus.CONFLICT, "Username Already Exists", e.getMessage(), request);
     }
 
     @ExceptionHandler(InvalidPasswordException.class)
     public ResponseEntity<StandardError> invalidPassword(InvalidPasswordException e, HttpServletRequest request){
-        String error = "Invalid Password";
-        HttpStatus status =HttpStatus.CONFLICT;
-        StandardError err = new StandardError(Instant.now(),status.value(),error,e.getMessage(),request.getRequestURI());
-        return ResponseEntity.status(status).body(err);
+        return buildResponse(HttpStatus.CONFLICT, "Invalid Password", e.getMessage(), request);
     }
 
     @ExceptionHandler(PasswordsDoNotMatchException.class)
     public ResponseEntity<StandardError> PasswordDONotMAtchException(PasswordsDoNotMatchException e, HttpServletRequest request){
-        String error = "Password do not Match";
-        HttpStatus status =HttpStatus.CONFLICT;
-        StandardError err = new StandardError(Instant.now(),status.value(),error,e.getMessage(),request.getRequestURI());
-        return ResponseEntity.status(status).body(err);
+        return buildResponse(HttpStatus.CONFLICT, "Password do not Match", e.getMessage(), request);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<StandardError> badCredentialsExceptionException(BadCredentialsException e, HttpServletRequest request){
-        String error = "Bad Credentials Exception";
-        HttpStatus status =HttpStatus.CONFLICT;
-        StandardError err = new StandardError(Instant.now(),status.value(),error,e.getMessage(),request.getRequestURI());
-        return ResponseEntity.status(status).body(err);
+        return buildResponse(HttpStatus.CONFLICT, "Bad Credentials Exception", e.getMessage(), request);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<StandardError> resourceNotFound(ResourceNotFoundException e, HttpServletRequest request){
-        String error = "Resource Not Found";
-        HttpStatus status = HttpStatus.NOT_FOUND;
-        StandardError err = new StandardError(Instant.now(),status.value(),error,e.getMessage(),request.getRequestURI());
-        return ResponseEntity.status(status).body(err);
+        return buildResponse(HttpStatus.NOT_FOUND, "Resource Not Found", e.getMessage(), request);
     }
 
     @ExceptionHandler(RoleNotFoundedExcpetion.class)
     public ResponseEntity<StandardError> roleNotFound(RoleNotFoundedExcpetion e, HttpServletRequest request){
-        String error = "Resource Not Found";
-        HttpStatus status = HttpStatus.NOT_FOUND;
-        StandardError err = new StandardError(Instant.now(),status.value(),error,e.getMessage(),request.getRequestURI());
-        return ResponseEntity.status(status).body(err);
+        return buildResponse(HttpStatus.NOT_FOUND, "Resource Not Found", e.getMessage(), request);
     }
 
     @ExceptionHandler(RegraNegocioException.class)
     public ResponseEntity<StandardError> regraNegocio(RegraNegocioException e, HttpServletRequest request){
-        String error = "Business rules error";
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        StandardError err = new StandardError(Instant.now(),status.value(),error,e.getMessage(),request.getRequestURI());
-        return ResponseEntity.status(status).body(err);
+        return buildResponse(HttpStatus.BAD_REQUEST, "Business rules error", e.getMessage(), request);
     }
 
 //    @ExceptionHandler(UnAtorizedeException.class)
@@ -90,40 +77,48 @@ public class ResourceExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<StandardError> accessDenied(AccessDeniedException e, HttpServletRequest request) {
-        String error = "Access denied";
-        HttpStatus status = HttpStatus.FORBIDDEN;
-        StandardError err = new StandardError(
-                Instant.now(),
-                status.value(),
-                error,
+        return buildResponse(
+                HttpStatus.FORBIDDEN,
+                "Access denied",
                 "You do not have permission to access this resource.",
-                request.getRequestURI()
+                request
         );
-        return ResponseEntity.status(status).body(err);
     }
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<StandardError> userNotFound(UserNotFoundException e, HttpServletRequest request){
-        String error = "User Not Founded";
-        HttpStatus status = HttpStatus.NOT_FOUND;
-        StandardError err = new StandardError(Instant.now(),status.value(),error,e.getMessage(),request.getRequestURI());
-        return ResponseEntity.status(status).body(err);
+        return buildResponse(HttpStatus.NOT_FOUND, "User Not Founded", e.getMessage(), request);
     }
 
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<StandardError> validation(MethodArgumentNotValidException e, HttpServletRequest request) {
-        String error = "Validation Error";
-        HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
-
-
         String errorMessage = e.getBindingResult().getFieldErrors().stream()
                 .map(FieldError::getDefaultMessage)
                 .findFirst()
                 .orElse("Erro in the fields");
 
-        StandardError err = new StandardError(Instant.now(), status.value(), error, errorMessage, request.getRequestURI());
-        return ResponseEntity.status(status).body(err);
+        return buildResponse(HttpStatus.UNPROCESSABLE_ENTITY, "Validation Error", errorMessage, request);
+    }
+
+    @ExceptionHandler(SecretAlreadyExistsException.class)
+    public ResponseEntity<StandardError> secretAlreadyExists(SecretAlreadyExistsException e, HttpServletRequest request){
+        return buildResponse(HttpStatus.CONFLICT, "Secret Already Exists", e.getMessage(), request);
+    }
+
+    @ExceptionHandler(SecretAlreadyActiveException.class)
+    public ResponseEntity<StandardError> secretAlreadyActive(SecretAlreadyActiveException e, HttpServletRequest request){
+        return buildResponse(HttpStatus.BAD_REQUEST, "Secret Already Active", e.getMessage(), request);
+    }
+
+    @ExceptionHandler(VaultKeyNotFoundException.class)
+    public ResponseEntity<StandardError> vaultKeyNotFound(VaultKeyNotFoundException e, HttpServletRequest request){
+        return buildResponse(HttpStatus.NOT_FOUND, "Vault Key Not Found", e.getMessage(), request);
+    }
+
+    @ExceptionHandler(SecretEncryptionException.class)
+    public ResponseEntity<StandardError> secretEncryption(SecretEncryptionException e, HttpServletRequest request){
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Encryption Error", e.getMessage(), request);
     }
 
 }
