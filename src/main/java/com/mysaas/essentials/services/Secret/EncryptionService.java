@@ -1,6 +1,6 @@
 package com.mysaas.essentials.services.Secret;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.mysaas.essentials.config.VaultConfig;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.Cipher;
@@ -16,18 +16,26 @@ import java.util.Base64;
 @Service
 public class EncryptionService {
 
-    @Value("${api.security.master-key}")
-    private String masterKey;
-
+    private final VaultConfig vaultConfig;
     private static final String ALGORITHM = "AES/CBC/PKCS5Padding";
 
+    public EncryptionService(VaultConfig vaultConfig) {
+        this.vaultConfig = vaultConfig;
+    }
 
     public EncryptedData encrypt(String plainText) throws Exception {
+        String currentKeyBase64 = vaultConfig.getActiveKey();
+        Integer currentVersion = vaultConfig.getActiveVersion();
+
+        if (currentKeyBase64 == null) {
+            throw new RuntimeException("Nenhuma chave mestra ativa encontrada no Vault!");
+        }
+        byte[] decodedKey = Base64.getDecoder().decode(currentKeyBase64);
+        SecretKeySpec keySpec = new SecretKeySpec(decodedKey, "AES");
+
         byte[] iv = new byte[16];
         new SecureRandom().nextBytes(iv);
         IvParameterSpec ivSpec = new IvParameterSpec(iv);
-
-        SecretKeySpec keySpec = new SecretKeySpec(masterKey.getBytes(StandardCharsets.UTF_8), "AES");
 
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec);
@@ -36,13 +44,21 @@ public class EncryptionService {
 
         return new EncryptedData(
                 Base64.getEncoder().encodeToString(cipherText),
-                Base64.getEncoder().encodeToString(iv)
+                Base64.getEncoder().encodeToString(iv),
+                currentVersion
         );
     }
 
-    public String decrypt(String cipherText, String iv) throws Exception {
+    public String decrypt(String cipherText, String iv, Integer version) throws Exception {
+        String keyBase64 = vaultConfig.getKey(version);
+
+        if (keyBase64 == null) {
+            throw new RuntimeException("Chave versão " + version + " não encontrada no cofre!");
+        }
+        byte[] decodedKey = Base64.getDecoder().decode(keyBase64);
+        SecretKeySpec keySpec = new SecretKeySpec(decodedKey, "AES");
+
         IvParameterSpec ivSpec = new IvParameterSpec(Base64.getDecoder().decode(iv));
-        SecretKeySpec keySpec = new SecretKeySpec(masterKey.getBytes(StandardCharsets.UTF_8), "AES");
 
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
@@ -51,6 +67,5 @@ public class EncryptionService {
         return new String(plainText, StandardCharsets.UTF_8);
     }
 
-
-    public record EncryptedData(String value, String iv) {}
+    public record EncryptedData(String value, String iv, Integer currentVersion) {}
 }

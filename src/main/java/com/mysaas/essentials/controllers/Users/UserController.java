@@ -47,7 +47,7 @@ public class UserController implements UserControllerDocs {
 
     @GetMapping("/admin/allusers")
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<PagedModel<EntityModel<UserResponse>>> getAllUsers(@RequestParam(value = "page", defaultValue = "0") Integer page,
                                                                              @RequestParam(value = "size", defaultValue = "12") Integer size,
                                                                              @RequestParam(value = "direction", defaultValue = "asc") String direction,
@@ -62,7 +62,7 @@ public class UserController implements UserControllerDocs {
 
     @GetMapping("/admin/findUsersByName/{name}")
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<PagedModel<EntityModel<UserResponse>>> findByName(@RequestParam(value = "page", defaultValue = "0") Integer page,
                                                                             @RequestParam(value = "size", defaultValue = "12") Integer size,
                                                                             @RequestParam(value = "direction", defaultValue = "asc") String direction,
@@ -78,7 +78,7 @@ public class UserController implements UserControllerDocs {
 
     @GetMapping("/admin/{id}")
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<EntityModel<UserResponse>> getUserById(@PathVariable UUID id) {
         EntityModel<UserResponse> response = userService.getUserById(id);
         return ResponseEntity.ok(response);
@@ -86,7 +86,7 @@ public class UserController implements UserControllerDocs {
 
     @DeleteMapping("/admin/{id}")
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> deleteUserById(@PathVariable UUID id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
@@ -94,7 +94,7 @@ public class UserController implements UserControllerDocs {
 
     @PutMapping("/admin/{id}")
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<EntityModel<UserResponse>> updateUserById(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateUserRequest request
@@ -105,7 +105,7 @@ public class UserController implements UserControllerDocs {
 
     @PatchMapping("/admin/role/{id}")
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<EntityModel<UserResponse>> updateRoleByUserID(@PathVariable UUID id, @Valid @RequestBody UpdateUserRoleRequest request){
         EntityModel<UserResponse> response = userService.updateRoleByUser(request, id);
         return ResponseEntity.ok(response);
@@ -113,7 +113,7 @@ public class UserController implements UserControllerDocs {
 
     @PatchMapping("/admin/status/{id}")
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public  ResponseEntity<EntityModel<UserResponse>> updateStatusByUserId(@PathVariable UUID id, @Valid @RequestBody UpdateUserStatusRequest request){
         EntityModel<UserResponse> response = userService.updateStatusByUser(request, id);
         return ResponseEntity.ok(response);
